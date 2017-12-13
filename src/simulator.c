@@ -44,7 +44,6 @@ void simulate()
         if (sys.event_counter > 10)
             fprintf(stderr, "euqal? %d\n", compare_stations_state(sys.initialized_stations, sys.stations));
 
-
         getchar();  // STEP BY STEP DEBUG
     }
 
@@ -108,7 +107,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
 {
     /* Initialize new node to be END event */
 
-    /*
+
     Node *end_notice = get_new_node(available);
     sprintf(end_notice->event.name, "END");
     end_notice->event.type = END;
@@ -117,7 +116,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     end_notice->event.occur_time = End_time;
     end_notice->next = NULL;
     end_notice->previous = NULL;
-    */
+
 
     /*
     Node *first_notice = get_new_node(available);
@@ -148,7 +147,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     third_notice->previous = NULL;
     */
 
-    //schedule(end_notice, pointer_to_fel);
+    schedule(end_notice, pointer_to_fel);
 
     int i;
     Node *new_notice;
@@ -213,7 +212,7 @@ int engine(System sys)
         }
     }
 
-    return halt;
+    return reached_end;
 }
 
 void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel)
