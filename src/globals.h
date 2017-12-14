@@ -15,12 +15,15 @@
 /*==================== EDIT THOSE VALUES ACCORDINGLY ====================*/
 // Remember to update the following values as stations and clients are added!!!
 #define N_STATIONS 2
-#define END_TIME 50
+#define END_TIME 100000
 #define N_CLIENTS 10
 
-/* Graphical parameters. Number of horizontal stations or events per row */
+//Graphical parameters. Number of horizontal stations or events per row
 #define MAX_STAT_COL 6
 #define MAX_EV_COL 10
+
+// Comment or uncomment the following line to (de)activate step-by-step prints throughout the simulator
+//#define DEBUG
 /*=======================================================================*/
 
 

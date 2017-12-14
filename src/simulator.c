@@ -1,7 +1,5 @@
 #include "simulator.h"
 
-#define DEBUG
-
 
 const double End_time = END_TIME;
 Node* available;
