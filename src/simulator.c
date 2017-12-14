@@ -25,8 +25,6 @@ void simulate()
     /* Run and print report at every cycle */
     while (!engine(sys))
     {
-        sys->event_counter++;
-
         if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
         {
             copy_stations(sys->stations, &(sys->initialized_stations));
@@ -215,6 +213,8 @@ int engine(System *sys)
             fprintf(stderr, "WHAT? END does not exist anymore.\n");
         break;
     }
+
+    sys->event_counter++;
 
     if (reached_end)
     {
