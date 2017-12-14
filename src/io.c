@@ -80,24 +80,48 @@ void print_fel_h(Node *fel)
         return;
     }
 
-    char *type[4] = {"ARR", "DEP", "END"};
-    Node *node;
-    int i = 0;
-    for (node = fel; node; node = node->next)
-        fprintf(stderr, "----EVENT #%d----\t", i++);  // Prints event # and increments it
-    fprintf(stderr, "\n");
-    for (node = fel; node; node = node->next)
-        fprintf(stderr, "Name:\t%s\t\t", node->event.name);
-    fprintf(stderr, "\n");
-    for (node = fel; node; node = node->next)
-        fprintf(stderr, "Type:\t%s\t\t", type[node->event.type]);
-    fprintf(stderr, "\n");
-    for (node = fel; node; node = node->next)
-        fprintf(stderr, "Stat:\t%d\t\t", node->event.station);
-    fprintf(stderr, "\n");
-    for (node = fel; node; node = node->next)
-        fprintf(stderr, "Time:\t%-15.6lf\t", node->event.occur_time);
-    fprintf(stderr, "\n");
+    char *type[3] = {"ARR", "DEP", "END"};  // To print the type from the numerical value
+
+    Node *node;  // Pointer to node which will scan through the nodes in the FEL
+    int  i, j, lim;     /* j: goes from 0 to the number of clients
+                         * i: goes from 0 to the # of clients in intervals of (max # of events to show per row)
+                         * lim: the min[(j + MAX_EV_COL), (N_CLIENTS)]. Used to stop i from surpassing N_CLIENTS */
+
+    /* External cycle: j goes from 0 to the # of clients in jumps of MAX_EV_COL (max number of events per column) */
+    for (j = 0; j < N_CLIENTS; j+=MAX_EV_COL)
+    {
+        lim = ((j + MAX_EV_COL)>N_CLIENTS)? N_CLIENTS : (j + MAX_EV_COL);  // lim assures i<N_CLIENTS and i<(j + MAX_EV_COL)
+        i = j;  // for each row, print from where left off
+
+        for (node = fel; node && (i < lim); node = node->next)  // Scan through nodes in FEL in batches of MAX_EV_COL
+            fprintf(stderr, "----EVENT #%d----\t", i++);  // Prints event number and increments it
+        fprintf(stderr, "\n");
+        i = j;
+        for (node = fel; node && (i < lim); node = node->next){
+            fprintf(stderr, "Name:\t%s\t\t", node->event.name);
+            i++;
+        }
+        fprintf(stderr, "\n");
+        i = j;
+        for (node = fel; node && (i < lim); node = node->next){
+            fprintf(stderr, "Type:\t%s\t\t", type[node->event.type]);
+            i++;
+        }
+        fprintf(stderr, "\n");
+        i = j;
+        for (node = fel; node && (i < lim); node = node->next){
+            fprintf(stderr, "Stat:\t%d\t\t", node->event.station);
+            i++;
+        }
+        fprintf(stderr, "\n");
+        i = j;
+        for (node = fel; node && (i < lim); node = node->next){
+            fprintf(stderr, "Time:\t%-15.6lf\t", node->event.occur_time);
+            i++;
+        }
+        fprintf(stderr, "\n");
+    }
+
 }
 
 void print_station(Station *stations, int index)
@@ -120,25 +144,30 @@ void print_all_stations_v(Station *stations)
 void print_all_stations_h(Station *stations)
 {
     fprintf(stderr, "----------------------------- STATIONS -----------------------------\n");
-    int i;
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "------- Station %d-------\t", i);
-    fprintf(stderr, "\n");
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "in service:\t%d\t\t", stations[i].jobs_in_service);
-    fprintf(stderr, "\n");
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "in queue:\t%d\t\t", stations[i].jobs_in_queue);
-    fprintf(stderr, "\n");
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "tot arrivals:\t%d\t\t", stations[i].arrivals_n);
-    fprintf(stderr, "\n");
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "tot departures:\t%d\t\t", stations[i].departures_n);
-    fprintf(stderr, "\n");
-    for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "area_jobs:\t%-16.5lf", stations[i].statistics.area_jobs);
-    fprintf(stderr, "\n");
+    int i, j, lim;
+    for (j = 0; j < N_STATIONS; j+=MAX_STAT_COL)
+    {
+        lim = ((j + MAX_STAT_COL)>N_STATIONS)? N_STATIONS : (j + MAX_STAT_COL);
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "------- Station %d-------\t", i);
+        fprintf(stderr, "\n");
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "in service:\t%d\t\t", stations[i].jobs_in_service);
+        fprintf(stderr, "\n");
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "in queue:\t%d\t\t", stations[i].jobs_in_queue);
+        fprintf(stderr, "\n");
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "tot arrivals:\t%d\t\t", stations[i].arrivals_n);
+        fprintf(stderr, "\n");
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "tot departures:\t%d\t\t", stations[i].departures_n);
+        fprintf(stderr, "\n");
+        for (i = j; i < lim; i++)
+            fprintf(stderr, "area_jobs:\t%-16.5lf", stations[i].statistics.area_jobs);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "\n");
+    }
 }
 
 void system_recap(System sys)
@@ -151,4 +180,5 @@ void system_recap(System sys)
     print_all_stations_h(sys.stations);
     fprintf(stderr, "\n");
     print_fel_h(sys.fel);
+    fprintf(stderr, "\n");
 }

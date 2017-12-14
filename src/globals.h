@@ -1,23 +1,34 @@
-#ifndef GLOBALS_H
+#ifndef GLOBALS_H  // Protection against multiple inclusion
 #define GLOBALS_H
 
 
+/*========== GLOBAL INCLUSIONS ==========*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "rngs.h"
 #include "rvgs.h"
+/*=======================================*/
 
 
-#define ARRIVAL 0
-#define DEPARTURE 1
-#define END 2
-
+/*==================== EDIT THOSE VALUES ACCORDINGLY ====================*/
+// Remember to update the following values as stations and clients are added!!!
 #define N_STATIONS 2
 #define END_TIME 50
+#define N_CLIENTS 10
 
-#define FILENAME   "./data/ssq1.dat"  /* input data file */
+/* Graphical parameters. Number of horizontal stations or events per row */
+#define MAX_STAT_COL 6
+#define MAX_EV_COL 10
+/*=======================================================================*/
+
+
+/*========== DEFINITIONS FOR TYPE OF EVENT ==========*/
+#define ARRIVAL 0
+#define DEPARTURE 1
+#define END 2  // Deprecated - Not in use anymore
+/*===================================================*/
 
 
 typedef struct event_notice
