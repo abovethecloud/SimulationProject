@@ -18,8 +18,7 @@ void simulate()
     fprintf(stderr, "======= Giro #%d =======\n", sys->event_counter);
     fprintf(stderr, "Clock:\t%lf\n", clock);
     print_all_stations(sys->stations);
-    print_fel(sys->fel);
-    //print_tree(fel);
+    //print_fel(sys->fel);
     getchar();
 
 
@@ -28,29 +27,40 @@ void simulate()
     {
         sys->event_counter++;
 
+
         fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
         fprintf(stderr, "Clock:\t%lf\n", clock);
         print_all_stations(sys->stations);
-        print_fel(sys->fel);
-        //print_tree(fel);
+        //print_fel(sys->fel);
         fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
+
 
         if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
         {
             copy_stations(sys->stations, &(sys->initialized_stations));
-            /* DEBUG
-            fprintf(stderr, "N_service delay = %d\n", sys.initialized_stations[0].jobs_in_service);
-            fprintf(stderr, "N_service server = %d\n", sys.initialized_stations[1].jobs_in_service);
-            */
+
+            fprintf(stderr, "N_service delay = %d\n", sys->initialized_stations[0].jobs_in_service);
+            fprintf(stderr, "N_service server = %d\n", sys->initialized_stations[1].jobs_in_service);
+
         }
+
 
         if (sys->event_counter > 10)
             fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
 
-        getchar();  // STEP BY STEP DEBUG
+        //getchar();  // STEP BY STEP DEBUG
+
     }
 
+    sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (clock);
+    sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (clock);
+
+    fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
+    fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
+    fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
+
     sys->event_counter++;
+
 
     fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
     fprintf(stderr, "Clock:\t%lf\n", clock);
@@ -58,6 +68,7 @@ void simulate()
     print_fel(sys->fel);
     //print_tree(fel);
     fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
+
 
     if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
     {
@@ -68,8 +79,10 @@ void simulate()
         */
     }
 
+    /*
     if (sys->event_counter > 10)
         fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
+    */
 
     fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
     fprintf(stderr, "N_arr: %d\n", sys->stations[1].arrivals_n);
@@ -109,6 +122,8 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_prob = 0.0;  // Does not apply
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
+    stat[0].statistics.area_jobs = 0.0;
+    stat[0].statistics.mean_number_jobs = 0.0;
 
     stat[1].type = 'S';
     stat[1].distribution = 'e';
@@ -125,6 +140,8 @@ void initialize_stations(Station **pointer_to_stations)
     stat[1].coffe_prob = 0.0;
     stat[1].coffe_distribution = 'e';
     stat[1].coffe_parameter = 10;
+    stat[1].statistics.area_jobs = 0.0;
+    stat[1].statistics.mean_number_jobs = 0.0;
 }
 
 void starting_events(Tree *pointer_to_fel, Station *stations)
@@ -208,12 +225,17 @@ int engine(System *sys)
 
     /* Get next event from FEL */
     Node* new_event = event_pop(pointer_to_fel);
+    /*
     fprintf(stderr, "NEW TIME: %lf\n", new_event->event.occur_time);
     fprintf(stderr, "NEW NAME: %s\n", new_event->event.name);
+    */
 
     /* update clock and check if reached End_time */
     double oldtime = clock;
-    update_clock(new_event, oldtime);
+    double delta = update_clock(new_event, oldtime);
+
+    stations[0].statistics.area_jobs += delta*(stations[0].jobs_in_service + stations[0].jobs_in_queue);
+    stations[1].statistics.area_jobs += delta*(stations[1].jobs_in_service + stations[1].jobs_in_queue);
 
     switch(new_event->event.type)
     {
@@ -371,20 +393,17 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
     schedule(node_event, pointer_to_fel);
 }
 
-int update_clock(Node* new_event, double oldtime)
+double update_clock(Node* new_event, double oldtime)
 {
-    int end = 0;
+    int delta = 0;
     clock = new_event->event.occur_time;
-    if (clock >= End_time)
+    /* If clock is set to End_time, reset it to last time to avoid altering statistics */
+    if (clock == End_time)
     {
-        end = 1;  /* Flag that END has been reached */
-        /* If clock is set to End_time, reset it to last time to avoid altering statistics */
-        if (clock == End_time)
-        {
-            clock = oldtime;
-        }
+        clock = oldtime;
     }
-    return end;
+    delta = clock - oldtime;
+    return delta;
 }
 
 int next_station(Station *stations, int current_station)

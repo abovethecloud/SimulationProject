@@ -15,7 +15,7 @@
 #define END 2
 
 #define N_STATIONS 2
-#define END_TIME 500
+#define END_TIME 50
 
 #define FILENAME   "./data/ssq1.dat"  /* input data file */
 
@@ -46,6 +46,12 @@ typedef struct queue
 
 typedef Node* Tree;
 
+typedef struct statistic_measures
+{
+    double area_jobs;
+    double mean_number_jobs;
+} Statistics;
+
 typedef struct station
 {
     char type;
@@ -61,13 +67,8 @@ typedef struct station
     double coffe_prob;
     char coffe_distribution;
     double coffe_parameter;
+    Statistics statistics;
 } Station;
-
-typedef struct statistic_measures
-{
-    int narr, ncom;
-    int job_number, event_counter, node_number;
-} Statistics;
 
 typedef struct system
 {
@@ -79,6 +80,6 @@ typedef struct system
 
 
 extern Node* available;
-
+extern double clock;
 
 #endif

@@ -51,7 +51,7 @@ void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_
 
 void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
-int update_clock(Node* new_event, double oldtime);
+double update_clock(Node* new_event, double oldtime);
 
 /*
  * Function:  next_station

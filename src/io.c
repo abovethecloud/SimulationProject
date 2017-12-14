@@ -89,3 +89,11 @@ void print_all_stations(Station *stations)
         print_station(stations, i);
     }
 }
+
+void system_recap(System sys)
+{
+    fprintf(stderr, "==================================================\n");
+    fprintf(stderr, "Clock = %lf\n", clock);
+    print_all_stations(sys.stations);
+    print_fel(sys.fel);
+}
