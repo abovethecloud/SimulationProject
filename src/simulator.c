@@ -15,7 +15,7 @@ void simulate()
     initialize(sys);
 
 
-    fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
+    fprintf(stderr, "======= Giro #%d =======\n", sys->event_counter);
     fprintf(stderr, "Clock:\t%lf\n", clock);
     print_all_stations(sys->stations);
     print_fel(sys->fel);
