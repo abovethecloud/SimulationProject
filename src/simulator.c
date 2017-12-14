@@ -1,6 +1,9 @@
 #include "simulator.h"
 
 
+#define DEBUG
+
+
 const double End_time = END_TIME;
 Node* available;
 double clock = 0;
@@ -14,44 +17,31 @@ void simulate()
     /* Initialize system */
     initialize(sys);
 
-
-    fprintf(stderr, "======= Giro #%d =======\n", sys->event_counter);
-    fprintf(stderr, "Clock:\t%lf\n", clock);
-    print_all_stations(sys->stations);
-    //print_fel(sys->fel);
+#ifdef DEBUG
+    /* Print DEBUG */
+    system_recap(true_sys);
     getchar();
-
+#endif
 
     /* Run and print report at every cycle */
     while (!engine(sys))
     {
         sys->event_counter++;
 
-
-        fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
-        fprintf(stderr, "Clock:\t%lf\n", clock);
-        print_all_stations(sys->stations);
-        //print_fel(sys->fel);
-        fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
-
-
         if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
         {
             copy_stations(sys->stations, &(sys->initialized_stations));
-
-            fprintf(stderr, "N_service delay = %d\n", sys->initialized_stations[0].jobs_in_service);
-            fprintf(stderr, "N_service server = %d\n", sys->initialized_stations[1].jobs_in_service);
-
         }
 
-
-        if (sys->event_counter > 10)
-            fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
-
-        //getchar();  // STEP BY STEP DEBUG
+#ifdef DEBUG
+        /* Print DEBUG */
+        system_recap(true_sys);
+        getchar();
+#endif
 
     }
 
+    // Compute final statistics
     sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (clock);
     sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (clock);
 
@@ -59,34 +49,9 @@ void simulate()
     fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
     fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
 
-    sys->event_counter++;
-
-
-    fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
-    fprintf(stderr, "Clock:\t%lf\n", clock);
-    print_all_stations(sys->stations);
-    print_fel(sys->fel);
-    //print_tree(fel);
-    fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
-
-
-    if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
-    {
-        copy_stations(sys->stations, &(sys->initialized_stations));
-        /* DEBUG
-        fprintf(stderr, "N_service delay = %d\n", sys.initialized_stations[0].jobs_in_service);
-        fprintf(stderr, "N_service server = %d\n", sys.initialized_stations[1].jobs_in_service);
-        */
-    }
-
-    /*
-    if (sys->event_counter > 10)
-        fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
-    */
-
     fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
     fprintf(stderr, "N_arr: %d\n", sys->stations[1].arrivals_n);
-    fprintf(stderr, "Clock: %lf\n", clock);
+    fprintf(stderr, "Final clock: %lf\n", clock);
     fprintf(stderr, "Throughput: %lf\n", sys->stations[1].departures_n/clock);
 
 }
