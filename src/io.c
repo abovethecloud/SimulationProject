@@ -51,6 +51,26 @@ void print_tree(Tree tree)
     fprintf(stderr, "\n");
 }
 
+void print_fel(Node *fel) {
+    int i = 0;
+    Node *next = fel;
+    if (!fel)
+        fprintf(stderr, "EMPTY FEL\n");
+    else {
+        fprintf(stderr, "---- FEL: ----\n");
+        while (next) {
+            EventNotice event = next->event;
+            fprintf(stderr, "Event in position %d:\n", i);
+            fprintf(stderr, "\tEvent name: %s\n", event.name);
+            fprintf(stderr, "\tEvent type: %d\n", event.type);
+            fprintf(stderr, "\tEvent time: %lf\n", event.occur_time);
+            fprintf(stderr, "\tEvent in station: %d\n", event.station);
+            next = next->next;
+            i++;
+        }
+    }
+}
+
 void print_station(Station *stations, int index)
 {
     Station station = stations[index];

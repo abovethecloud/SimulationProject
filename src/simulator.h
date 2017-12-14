@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "list_manager.h"
 #include "io.h"
+#include "utils.h"
 
 /*
  * Function:  simulate
@@ -36,7 +37,7 @@ double getServiceFromOutside();
  *
  *  returns: halt condition. 1 if the simulation has to stop, 0 if it has to continue
  */
-int engine(System sys);
+int engine(System *sys);
 
 void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
@@ -64,17 +65,6 @@ int update_clock(Node* new_event, double oldtime);
  *  returns: index of next station
  */
 int next_station(Station *stations, int current_station);
-
-/*
- * Function:  approx_equal
- * --------------------
- * decides if two double values - d1 and d2 - are close enough to be considered equal
- * by checking wether the absolute value of the difference |d1 - d2| is less than a small epsilon.
- *
- *  returns: 1 if the values are approximately equal
- *           0 if the values are not approximately equal
- */
-int approx_equal(double d1, double d2);
 
 double station_random_time(Station *stations, int station_index);
 

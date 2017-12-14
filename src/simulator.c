@@ -8,49 +8,73 @@ int reached_end = 0;
 
 void simulate()
 {
-    System sys;
+    System true_sys;
+    System *sys = &true_sys;
 
     /* Initialize system */
-    initialize(&sys);
+    initialize(sys);
 
-    /*
-    fprintf(stderr, "======= Giro #%d ========\n", sys.event_counter);
+
+    fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
     fprintf(stderr, "Clock:\t%lf\n", clock);
-    print_all_stations(sys.stations);
+    print_all_stations(sys->stations);
+    print_fel(sys->fel);
     //print_tree(fel);
     getchar();
-    */
+
 
     /* Run and print report at every cycle */
     while (!engine(sys))
     {
-        sys.event_counter++;
+        sys->event_counter++;
 
-        fprintf(stderr, "======= Giro #%d ========\n", sys.event_counter);
+        fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
         fprintf(stderr, "Clock:\t%lf\n", clock);
-        print_all_stations(sys.stations);
+        print_all_stations(sys->stations);
+        print_fel(sys->fel);
         //print_tree(fel);
-        fprintf(stderr, "N_dep: %d\n", sys.stations[1].departures_n);
+        fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
 
-        if (sys.event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
+        if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
         {
-            copy_stations(sys.stations, &(sys.initialized_stations));
+            copy_stations(sys->stations, &(sys->initialized_stations));
             /* DEBUG
             fprintf(stderr, "N_service delay = %d\n", sys.initialized_stations[0].jobs_in_service);
             fprintf(stderr, "N_service server = %d\n", sys.initialized_stations[1].jobs_in_service);
             */
         }
 
-        if (sys.event_counter > 10)
-            fprintf(stderr, "euqal? %d\n", compare_stations_state(sys.initialized_stations, sys.stations));
+        if (sys->event_counter > 10)
+            fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
 
         getchar();  // STEP BY STEP DEBUG
     }
 
-    fprintf(stderr, "N_dep: %d\n", sys.stations[1].departures_n);
-    fprintf(stderr, "N_arr: %d\n", sys.stations[1].arrivals_n);
+    sys->event_counter++;
+
+    fprintf(stderr, "======= Giro #%d ========\n", sys->event_counter);
+    fprintf(stderr, "Clock:\t%lf\n", clock);
+    print_all_stations(sys->stations);
+    print_fel(sys->fel);
+    //print_tree(fel);
+    fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
+
+    if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
+    {
+        copy_stations(sys->stations, &(sys->initialized_stations));
+        /* DEBUG
+        fprintf(stderr, "N_service delay = %d\n", sys.initialized_stations[0].jobs_in_service);
+        fprintf(stderr, "N_service server = %d\n", sys.initialized_stations[1].jobs_in_service);
+        */
+    }
+
+    if (sys->event_counter > 10)
+        fprintf(stderr, "euqal? %d\n", compare_stations_state(sys->initialized_stations, sys->stations));
+
+    fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
+    fprintf(stderr, "N_arr: %d\n", sys->stations[1].arrivals_n);
     fprintf(stderr, "Clock: %lf\n", clock);
-    fprintf(stderr, "Throughput: %lf\n", sys.stations[1].departures_n/clock);
+    fprintf(stderr, "Throughput: %lf\n", sys->stations[1].departures_n/clock);
 
 }
 
@@ -147,7 +171,6 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     third_notice->previous = NULL;
     */
 
-    schedule(end_notice, pointer_to_fel);
 
     int i;
     Node *new_notice;
@@ -162,10 +185,12 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
         new_notice->next = NULL;
         new_notice->previous = NULL;
         schedule(new_notice, pointer_to_fel);
-
     }
 
     /* Schedule END event in FEL */
+    schedule(end_notice, pointer_to_fel);
+
+
     /*
     schedule(first_notice, pointer_to_fel);
     schedule(second_notice, pointer_to_fel);
@@ -173,10 +198,10 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     */
 }
 
-int engine(System sys)
+int engine(System *sys)
 {
-    Station *stations = sys.stations;
-    Tree *pointer_to_fel = &(sys.fel);
+    Station *stations = sys->stations;
+    Tree *pointer_to_fel = &(sys->fel);
 
     /* Initializations */
     int halt = 0;
@@ -188,7 +213,7 @@ int engine(System sys)
 
     /* update clock and check if reached End_time */
     double oldtime = clock;
-    reached_end = update_clock(new_event, oldtime);
+    update_clock(new_event, oldtime);
 
     switch(new_event->event.type)
     {
@@ -199,20 +224,21 @@ int engine(System sys)
             departure(new_event, stations, pointer_to_fel);
         break;
         case END:
-            // return_node(new_event);
+            reached_end = 1;
+            return_node(new_event);
             // fprintf(stderr, "NEXT_TIME: %lf\n", new_event->event.occur_time);
         break;
     }
 
     if (reached_end)
     {
-        if (compare_stations_state(sys.stations, sys.initialized_stations))
+        if (compare_stations_state(sys->stations, sys->initialized_stations))
         {
             halt = 1;
         }
     }
 
-    return reached_end;
+    return halt;
 }
 
 void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel)
@@ -379,15 +405,6 @@ int next_station(Station *stations, int current_station)
             //return i;
     }
     return -1;
-}
-
-int approx_equal(double d1, double d2)
-{
-    const double epsilon = 0.0000001;  // To compare double values
-    if (fabs(d1-d2) < epsilon)
-        return 1;
-    else
-        return 0;
 }
 
 double station_random_time(Station *stations, int station_index)

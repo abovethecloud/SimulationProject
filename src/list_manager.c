@@ -40,22 +40,125 @@ Node* get_new_node(Node* available)
 
 Node* event_pop(Tree *pointer_to_fel)
 {
-  Node *p;
-  Tree *t = pointer_to_fel;
+  Node *next_event = (*pointer_to_fel);
+  (*pointer_to_fel) = (*pointer_to_fel)->next;
+  (*pointer_to_fel)->previous = NULL;
 
-  while ((*t)->previous)
-  {
-    t = &((*t)->previous);
-  }
-  p = *t;
-  *t=(*t)->next;
-  p->next = NULL;
-  return p;
+  next_event->next = NULL;
+  next_event->previous = NULL;
+
+  return next_event;
 }
 
 void schedule(Node* node_event, Tree *pointer_to_fel)
 {
-  recursive_insertion(pointer_to_fel, node_event);
+  int n_equal = 0;
+  int ev_type = node_event->event.type;
+  double ev_time = node_event->event.occur_time;
+
+  Node *first_equal = NULL, *last_equal = NULL;
+  Node *prev = NULL, *nex = NULL;
+  Node *first = NULL, *last = NULL;
+
+  /* If FEL is empty, set FEL to new event */
+  if (!*pointer_to_fel){
+    (*pointer_to_fel) = node_event;
+
+    // Initialize next and previous
+    (*pointer_to_fel)->next = NULL;
+    (*pointer_to_fel)->previous = NULL;
+    return;
+  }
+
+  /* Search for events at the same time */
+  Node *temp = *pointer_to_fel;
+  first = temp;
+
+  while (temp) {
+    if (approx_equal(temp->event.occur_time, ev_time)) {
+      n_equal++;  // Counts events at same time
+      if (n_equal == 1) {
+        first_equal = temp;  // Save pointer to first contemporary event
+      }
+      last_equal = temp;  // Save pointer to last contemporary event
+    }
+    last = temp;
+
+    temp = temp->next;  // Consider next event
+  }
+
+  temp = NULL;
+
+  // TODO: Maybe it is possible to check if < first or > last to save time
+
+  if (n_equal == 0) {
+    // Check if before the first
+    if (ev_time < first->event.occur_time) {
+      temp = *pointer_to_fel;  // Save current first address
+      *pointer_to_fel = node_event;  // Update to new first address
+
+      (*pointer_to_fel)->next = temp;
+      (*pointer_to_fel)->previous = NULL;
+      temp->previous = (*pointer_to_fel);
+      return;
+    }
+    // Check if later than last
+    if (ev_time > last->event.occur_time) {
+      last->next = node_event;
+      node_event->previous = last;
+      node_event->next = NULL;
+      return;
+    }
+
+    temp = *pointer_to_fel;
+    while (temp){
+      if (ev_time < temp->event.occur_time) {  // If new_event is before temp, prepare to insert between temp->previous and temp
+        prev = temp->previous;
+        nex = temp;
+        break;
+      }
+      /*
+      if (!(temp->next)) {  // If temp is last element, prepare to insert after temp and before NULL
+        prev = temp;
+        nex = NULL;
+        break;
+      }
+      */
+      temp = temp->next;
+    }
+
+    // Insert node
+    node_event->previous = prev;
+    node_event->next = nex;
+
+    // complete link with previous and next
+    if (prev)
+      prev->next = node_event;
+    if (nex)
+      nex->previous = node_event;
+  }
+
+  if (n_equal > 0) {
+    if (ev_type == DEPARTURE) {
+      prev = first_equal->previous;
+      nex = first_equal;
+    }
+    if (ev_type == ARRIVAL){
+      prev = last_equal;
+      nex = last_equal->next;
+    }
+
+    // Insert node
+    node_event->previous = prev;
+    node_event->next = nex;
+
+    // complete link with previous and next
+    if (prev)
+      prev->next = node_event;
+    if (nex)
+      nex->previous = node_event;
+  }
+
 }
 
 void recursive_insertion(Tree *t3, Node *node_event)

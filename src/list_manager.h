@@ -2,6 +2,7 @@
 #define LIST_MANAGER_H
 
 #include "globals.h"
+#include "utils.h"
 
 Node* get_new_node(Node *available);
 Node* event_pop(Tree *pointer_to_fel);
