@@ -1,6 +1,5 @@
 #include "simulator.h"
 
-
 #define DEBUG
 
 
@@ -113,7 +112,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
 {
     /* Initialize new node to be END event */
 
-
+    /*
     Node *end_notice = get_new_node(available);
     sprintf(end_notice->event.name, "END");
     end_notice->event.type = END;
@@ -122,7 +121,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     end_notice->event.occur_time = End_time;
     end_notice->next = NULL;
     end_notice->previous = NULL;
-
+    */
 
     /*
     Node *first_notice = get_new_node(available);
@@ -170,7 +169,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     }
 
     /* Schedule END event in FEL */
-    schedule(end_notice, pointer_to_fel);
+    //schedule(end_notice, pointer_to_fel);
 
 
     /*
@@ -198,6 +197,8 @@ int engine(System *sys)
     /* update clock and check if reached End_time */
     double oldtime = clock;
     double delta = update_clock(new_event, oldtime);
+    if (clock >= End_time)
+        reached_end = 1;
 
     stations[0].statistics.area_jobs += delta*(stations[0].jobs_in_service + stations[0].jobs_in_queue);
     stations[1].statistics.area_jobs += delta*(stations[1].jobs_in_service + stations[1].jobs_in_queue);
@@ -211,9 +212,7 @@ int engine(System *sys)
             departure(new_event, stations, pointer_to_fel);
         break;
         case END:
-            reached_end = 1;
-            return_node(new_event);
-            // fprintf(stderr, "NEXT_TIME: %lf\n", new_event->event.occur_time);
+            fprintf(stderr, "WHAT? END does not exist anymore.\n");
         break;
     }
 
@@ -360,7 +359,7 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
 
 double update_clock(Node* new_event, double oldtime)
 {
-    int delta = 0;
+    double delta = 0;
     clock = new_event->event.occur_time;
     /* If clock is set to End_time, reset it to last time to avoid altering statistics */
     if (clock == End_time)

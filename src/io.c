@@ -84,19 +84,19 @@ void print_fel_h(Node *fel)
     Node *node;
     int i = 0;
     for (node = fel; node; node = node->next)
-        fprintf(stderr, "--EVENT #%d--\t", i++);  // Prints event # and increments it
+        fprintf(stderr, "----EVENT #%d----\t", i++);  // Prints event # and increments it
     fprintf(stderr, "\n");
     for (node = fel; node; node = node->next)
-        fprintf(stderr, "Name:\t%s\t", node->event.name);
+        fprintf(stderr, "Name:\t%s\t\t", node->event.name);
     fprintf(stderr, "\n");
     for (node = fel; node; node = node->next)
-        fprintf(stderr, "Type:\t%s\t", type[node->event.type]);
+        fprintf(stderr, "Type:\t%s\t\t", type[node->event.type]);
     fprintf(stderr, "\n");
     for (node = fel; node; node = node->next)
-        fprintf(stderr, "Stat:\t%d\t", node->event.station);
+        fprintf(stderr, "Stat:\t%d\t\t", node->event.station);
     fprintf(stderr, "\n");
     for (node = fel; node; node = node->next)
-        fprintf(stderr, "Time:\t%3.3lf\t", node->event.occur_time);
+        fprintf(stderr, "Time:\t%-15.6lf\t", node->event.occur_time);
     fprintf(stderr, "\n");
 }
 
@@ -122,22 +122,22 @@ void print_all_stations_h(Station *stations)
     fprintf(stderr, "----------------------------- STATIONS -----------------------------\n");
     int i;
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "Station %d\t\t\t\t", i);
+        fprintf(stderr, "------- Station %d-------\t", i);
     fprintf(stderr, "\n");
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "\tin service:\t%d\t\t", stations[i].jobs_in_service);
+        fprintf(stderr, "in service:\t%d\t\t", stations[i].jobs_in_service);
     fprintf(stderr, "\n");
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "\tin queue:\t%d\t\t", stations[i].jobs_in_queue);
+        fprintf(stderr, "in queue:\t%d\t\t", stations[i].jobs_in_queue);
     fprintf(stderr, "\n");
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "\ttot arrivals:\t%d\t\t", stations[i].arrivals_n);
+        fprintf(stderr, "tot arrivals:\t%d\t\t", stations[i].arrivals_n);
     fprintf(stderr, "\n");
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "\ttot departures:\t%d\t\t", stations[i].departures_n);
+        fprintf(stderr, "tot departures:\t%d\t\t", stations[i].departures_n);
     fprintf(stderr, "\n");
     for (i = 0; i < N_STATIONS; i++)
-        fprintf(stderr, "\tarea_jobs:\t%3.3lf\t", stations[i].statistics.area_jobs);
+        fprintf(stderr, "area_jobs:\t%-16.5lf", stations[i].statistics.area_jobs);
     fprintf(stderr, "\n");
 }
 
