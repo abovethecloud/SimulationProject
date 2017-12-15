@@ -40,9 +40,13 @@ Node* get_new_node(Node* available)
 
 Node* event_pop(Tree *pointer_to_fel)
 {
+
   Node *next_event = (*pointer_to_fel);
-  (*pointer_to_fel) = (*pointer_to_fel)->next;
-  (*pointer_to_fel)->previous = NULL;
+  if ( ((*pointer_to_fel)->next) ) {
+    (*pointer_to_fel) = (*pointer_to_fel)->next;
+    (*pointer_to_fel)->previous = NULL;
+  } else
+    *pointer_to_fel = NULL;
 
   next_event->next = NULL;
   next_event->previous = NULL;

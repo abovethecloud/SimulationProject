@@ -23,15 +23,6 @@ void simulate()
 
     while (!engine(sys))
     {
-        /* NEW DEBUG
-        if (clock < 2000){
-            system_recap(system);
-            getchar();
-        }
-        if (clock > 175000)
-            system_recap(system);
-        */
-
         #ifdef DEBUG  // Print DEBUG
         system_recap(system);
         getchar();
