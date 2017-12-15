@@ -74,4 +74,6 @@ void copy_stations(Station *stations, Station **new_stations_address);
 
 int compare_stations_state(Station *s1, Station *s2);
 
+void set_renewal_state(System *sys_point);
+
 #endif

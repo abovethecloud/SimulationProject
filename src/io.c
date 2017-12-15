@@ -173,9 +173,9 @@ void print_all_stations_h(Station *stations)
 void system_recap(System sys)
 {
     fprintf(stderr, "\n\n");
-    fprintf(stderr, "====================================================================\n");
-    fprintf(stderr, "========================= Clock = %lf =========================\n", clock);
-    fprintf(stderr, "====================================================================\n");
+    fprintf(stderr, "============================================================================\n");
+    fprintf(stderr, "========================= Clock = %16.5lf =========================\n", clock);
+    fprintf(stderr, "============================================================================\n");
     fprintf(stderr, "\n");
     print_all_stations_h(sys.stations);
     fprintf(stderr, "\n");

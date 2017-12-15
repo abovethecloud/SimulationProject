@@ -8,32 +8,34 @@ int reached_end = 0;
 
 void simulate()
 {
-    System true_sys;
-    System *sys = &true_sys;
+    System system;
+    System *sys = &system;
 
     /* Initialize system */
     initialize(sys);
 
-#ifdef DEBUG
-    /* Print DEBUG */
-    system_recap(true_sys);
+    #ifdef DEBUG  // Print DEBUG
+    system_recap(system);
     getchar();
-#endif
+    #endif
 
-    /* Run and print report at every cycle */
+    /* Run and print report at every cycle if DEBUG is ON */
+
     while (!engine(sys))
     {
-        if (sys->event_counter == 10)  // Check that all 10 customers have arrived in delay station. Initial conditions.
-        {
-            copy_stations(sys->stations, &(sys->initialized_stations));
+        /* NEW DEBUG
+        if (clock < 2000){
+            system_recap(system);
+            getchar();
         }
+        if (clock > 175000)
+            system_recap(system);
+        */
 
-#ifdef DEBUG
-        /* Print DEBUG */
-        system_recap(true_sys);
+        #ifdef DEBUG  // Print DEBUG
+        system_recap(system);
         getchar();
-#endif
-
+        #endif
     }
 
     // Compute final statistics
@@ -60,6 +62,7 @@ void initialize(System *sys_point)
     sys_point->fel = NULL;
 
     starting_events(&(sys_point->fel), (sys_point->stations));
+    set_renewal_state(sys_point);
 }
 
 void initialize_stations(Station **pointer_to_stations)
@@ -465,4 +468,13 @@ int compare_stations_state(Station *s1, Station *s2)
         }
     }
     return equal;
+}
+
+void set_renewal_state(System *sys_point)
+{
+    copy_stations(sys_point->stations, &(sys_point->initialized_stations));
+    sys_point->initialized_stations[0].jobs_in_service = 10;
+    sys_point->initialized_stations[0].jobs_in_queue = 0;
+    sys_point->initialized_stations[1].jobs_in_service = 0;
+    sys_point->initialized_stations[1].jobs_in_queue = 0;
 }
