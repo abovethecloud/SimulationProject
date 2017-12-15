@@ -1,5 +1,5 @@
 # project name (generate executable with this name)
-TARGET   = new_project
+TARGET   = new_project.out
 
 CC       = gcc
 # compiling flags here (try "-std=c99")

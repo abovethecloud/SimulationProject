@@ -18,9 +18,9 @@
 #define END_TIME 175000
 #define N_CLIENTS 10
 
-//Graphical parameters. Number of horizontal stations or events per row
-#define MAX_STAT_COL 6
-#define MAX_EV_COL 10
+// Graphical parameters. Number of horizontal stations or events per row
+#define MAX_STAT_COL 3  // Max number of stations per row
+#define MAX_EV_COL 5  // Max number of events per row
 
 // Comment or uncomment the following line to (de)activate step-by-step prints throughout the simulator
 //#define DEBUG
