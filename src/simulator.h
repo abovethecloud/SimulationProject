@@ -5,6 +5,7 @@
 #include "list_manager.h"
 #include "io.h"
 #include "utils.h"
+#include "statistics.h"
 
 /*
  * Function:  simulate

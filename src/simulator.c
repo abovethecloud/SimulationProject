@@ -131,6 +131,8 @@ int engine(System *sys)
     if (clock >= End_time)
         reached_end = 1;
 
+    update_statistics(sys);
+
     stations[0].statistics.area_jobs += delta*(stations[0].jobs_in_service + stations[0].jobs_in_queue);
     stations[1].statistics.area_jobs += delta*(stations[1].jobs_in_service + stations[1].jobs_in_queue);
 
