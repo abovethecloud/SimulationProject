@@ -100,51 +100,9 @@ void initialize_stations(Station **pointer_to_stations)
 
 void starting_events(Tree *pointer_to_fel, Station *stations)
 {
-    /* Initialize new node to be END event */
-
-    /*
-    Node *end_notice = get_new_node(available);
-    sprintf(end_notice->event.name, "END");
-    end_notice->event.type = END;
-    end_notice->event.station = -1;  // OUTSIDE
-    end_notice->event.create_time = clock;
-    end_notice->event.occur_time = End_time;
-    end_notice->next = NULL;
-    end_notice->previous = NULL;
-    */
-
-    /*
-    Node *first_notice = get_new_node(available);
-    sprintf(first_notice->event.name, "J");
-    first_notice->event.type = ARRIVAL;
-    first_notice->event.station = 0;  // First arrival to station 0
-    first_notice->event.create_time = clock;
-    first_notice->event.occur_time = 0.0;
-    first_notice->next = NULL;
-    first_notice->previous = NULL;
-
-    Node *second_notice = get_new_node(available);
-    sprintf(second_notice->event.name, "J");
-    second_notice->event.type = ARRIVAL;
-    second_notice->event.station = 0;  // Second arrival to station 1
-    second_notice->event.create_time = clock;
-    second_notice->event.occur_time = 0.0;
-    second_notice->next = NULL;
-    second_notice->previous = NULL;
-
-    Node *third_notice = get_new_node(available);
-    sprintf(third_notice->event.name, "J");
-    third_notice->event.type = ARRIVAL;
-    third_notice->event.station = 0;  // Second arrival to station 1
-    third_notice->event.create_time = clock;
-    third_notice->event.occur_time = 0.0;
-    third_notice->next = NULL;
-    third_notice->previous = NULL;
-    */
-
-
     int i;
     Node *new_notice;
+    // Schedule 10 arrivals at the delay station
     for (i = 0; i < 10; i++)
     {
         new_notice = get_new_node(available);
@@ -157,16 +115,6 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
         new_notice->previous = NULL;
         schedule(new_notice, pointer_to_fel);
     }
-
-    /* Schedule END event in FEL */
-    //schedule(end_notice, pointer_to_fel);
-
-
-    /*
-    schedule(first_notice, pointer_to_fel);
-    schedule(second_notice, pointer_to_fel);
-    schedule(third_notice, pointer_to_fel);
-    */
 }
 
 int engine(System *sys)
@@ -179,10 +127,6 @@ int engine(System *sys)
 
     /* Get next event from FEL */
     Node* new_event = event_pop(pointer_to_fel);
-    /*
-    fprintf(stderr, "NEW TIME: %lf\n", new_event->event.occur_time);
-    fprintf(stderr, "NEW NAME: %s\n", new_event->event.name);
-    */
 
     /* update clock and check if reached End_time */
     double oldtime = clock;
@@ -243,12 +187,11 @@ void arrival_at_delay(Node* node_event, Station *stations, Tree *pointer_to_fel)
     int station_index = node_event->event.station;
     stations[station_index].jobs_in_service++;
 
-    /* Schedule a departure without queuing */
+    /* Change into a departure from same station without queuing */
     node_event->event.type = DEPARTURE;
-    // node_event->event.station non cambia
-
     node_event->event.occur_time = clock + station_random_time(stations, station_index);
-    schedule(node_event, pointer_to_fel);
+
+    schedule(node_event, pointer_to_fel);  // Schedule the departure
 }
 
 void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel)
@@ -266,11 +209,11 @@ void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel
         /* Process arrival at non-full server */
         stations[station_index].jobs_in_service++;  // Add a job in service
 
-        /* Schedule a departure from same station after service time */
+        /* Change into a departure from same station after service time */
         node_event->event.type = DEPARTURE;
-
         node_event->event.occur_time = clock + station_random_time(stations, station_index);
-        schedule(node_event, pointer_to_fel);
+
+        schedule(node_event, pointer_to_fel);  // Schedule departure
     }
     else {
         /* Process arrival at full server */
@@ -303,11 +246,11 @@ void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_
     int station_index = node_event->event.station;
     stations[station_index].jobs_in_service--;
 
-    /* Schedule arrival in next station ignoring queuing */
+    /* Change into arrival in next station at same time of departure */
     node_event->event.type = ARRIVAL;
     node_event->event.station = next_station(stations, station_index);
-    // "node_event->event.occur_time" resta uguale
-    schedule(node_event, pointer_to_fel);
+
+    schedule(node_event, pointer_to_fel);  // Schedule ARRIVAL
 }
 
 
@@ -323,9 +266,9 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
     if (stations[station_index].queue.tail) {
         /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
         next_job = dequeue(&stations[node_event->event.station]);
-        stations[station_index].jobs_in_queue--;  // TODO: This actually reduces the number of jobs in queue before arrival
+        stations[station_index].jobs_in_queue--;
 
-        /* Process arrival at non-full server */
+        /* Process arrival at non-full server (this is sure since there has just been a departure) */
         stations[station_index].jobs_in_service++;  // Add a job in service
 
         /* In case of a coffe break, schedule a longer repair to take the pause into account */
@@ -335,29 +278,19 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
         next_job->event.type = DEPARTURE;
         next_job->event.occur_time = clock + coffe_length + station_random_time(stations, station_index);
         schedule(next_job, pointer_to_fel);
-        /*
-        next_job->event.type = ARRIVAL;
-        next_job->event.occur_time = clock;  // TODO: GENERALIZE
-        schedule(next_job, pointer_to_fel);
-        */
     }
 
-    /* Schedule the arrival at next station */
+    /* Change into arrival at next station */
     node_event->event.type = ARRIVAL;
-    node_event->event.station = next_station(stations, station_index);  //TODO: GENERALIZE to NEXT STATION
-    // "node_event->event.occur_time" resta uguale
-    schedule(node_event, pointer_to_fel);
+    node_event->event.station = next_station(stations, station_index);
+
+    schedule(node_event, pointer_to_fel);  // Schedule arrival to next station
 }
 
 double update_clock(Node* new_event, double oldtime)
 {
     double delta = 0;
     clock = new_event->event.occur_time;
-    /* If clock is set to End_time, reset it to last time to avoid altering statistics */
-    if (clock == End_time)
-    {
-        clock = oldtime;
-    }
     delta = clock - oldtime;
     return delta;
 }
