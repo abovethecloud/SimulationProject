@@ -14,33 +14,30 @@ void simulate()
     /* Initialize system */
     initialize(sys);
 
-    #ifdef DEBUG  // Print DEBUG
-    system_recap(system);
-    getchar();
-    #endif
-
-    /* Run and print report at every cycle if DEBUG is ON */
-
-    while (!engine(sys))
-    {
+    /* Print report (if DEBUG is ON) and THEN run */
+    do {
         #ifdef DEBUG  // Print DEBUG
         system_recap(system);
         getchar();
         #endif
-    }
+    } while (!engine(sys));
+
 
     // Compute final statistics
     sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (clock);
     sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (clock);
 
+    /* Final prints */
+    system_recap(system);
+
     fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
     fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
     fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
 
-    fprintf(stderr, "N_dep: %d\n", sys->stations[1].departures_n);
-    fprintf(stderr, "N_arr: %d\n", sys->stations[1].arrivals_n);
+    fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].departures_n);
+    fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].arrivals_n);
     fprintf(stderr, "Final clock: %lf\n", clock);
-    fprintf(stderr, "Throughput: %lf\n", sys->stations[1].departures_n/clock);
+    fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/clock);
 
 }
 
