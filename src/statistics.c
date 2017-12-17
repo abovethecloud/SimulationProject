@@ -2,15 +2,18 @@
 
 void compute_statistics(System *sys)
 {
-    sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (T);
-    sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (T);
-
-    sys->stations[1].statistics.mean_waiting_time = sys->stations[1].statistics.waiting_area / ((double) sys->stations[1].arrivals_n);
+    int i;
+    for (i = 0; i < N_STATIONS; i++){
+        sys->statistics.mean_number_jobs[i] = sys->stations[i].measures.waiting_area/T;
+        sys->statistics.mean_waiting_time[i] = sys->stations[i].measures.waiting_area/((double) sys->stations[i].measures.arrivals_n);
+        sys->statistics.throughput[i] = ((double) sys->stations[i].measures.departures_n)/T;
+    }
 }
 
-void update_statistics(System *sys, double delta)
+void update_stations_measurements(System *sys, double delta)
 {
-    sys->stations[0].statistics.area_jobs += delta*(sys->stations[0].jobs_in_service + sys->stations[0].jobs_in_queue);
-    sys->stations[1].statistics.area_jobs += delta*(sys->stations[1].jobs_in_service + sys->stations[1].jobs_in_queue);
-    sys->stations[1].statistics.waiting_area += delta*(sys->stations[1].jobs_in_service + sys->stations[1].jobs_in_queue);
+    int i;
+    for (i = 0; i < N_STATIONS; i++){
+        sys->stations[i].measures.waiting_area += delta*(sys->stations[i].jobs_in_service + sys->stations[i].jobs_in_queue);
+    }
 }

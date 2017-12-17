@@ -5,6 +5,6 @@
 
 void compute_statistics(System *sys);
 
-void update_statistics(System *sys, double delta);
+void update_stations_measurements(System *sys, double delta);
 
 #endif

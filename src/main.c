@@ -7,7 +7,7 @@
 
 int main(int argc, char const *argv[])
 {
-    PlantSeeds(1);
+    PlantSeeds(123456789);
 
     System sys;
     simulate(&sys);

@@ -64,11 +64,26 @@ typedef Node* Tree;
 
 typedef struct statistic_measures
 {
-    double area_jobs;
-    double mean_number_jobs;
-    double waiting_area;
-    double mean_waiting_time;
+    double mean_number_jobs[N_STATIONS];
+    double mean_waiting_time[N_STATIONS];
+    double throughput[N_STATIONS];
 } Statistics;
+
+typedef struct measurements
+{
+    int arrivals_n;
+    int departures_n;
+    double waiting_area;
+} Measurements;
+
+typedef struct run_means
+{
+    double mean_observation_time;
+
+    int mean_arrivals[N_STATIONS];
+    int mean_departures[N_STATIONS];
+    double mean_waiting_area[N_STATIONS];
+} Means;
 
 typedef struct station
 {
@@ -79,13 +94,11 @@ typedef struct station
     Queue queue;
     int jobs_in_service;
     int jobs_in_queue;
-    int arrivals_n;
-    int departures_n;
     int server_n;  // Only for servers
     double coffe_prob;
     char coffe_distribution;
     double coffe_parameter;
-    Statistics statistics;
+    Measurements measures;
 } Station;
 
 typedef struct system
@@ -94,6 +107,7 @@ typedef struct system
     Station *stations;
     Station *initialized_stations;
     Tree fel;
+    Statistics statistics;
 } System;
 
 

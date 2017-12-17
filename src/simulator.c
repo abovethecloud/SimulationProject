@@ -5,7 +5,7 @@ double End_time = END_TIME;
 Node* available;
 double clock = 0.0;
 double oldclock = 0.0;
-double T = 0.0, meanT = 0.0;
+double T = 0.0;
 double mean_arrivals_at1 = 0.0;
 
 int reached_end = 0;
@@ -13,6 +13,7 @@ int reached_end = 0;
 void simulate(System *sys)
 {
     int i;
+    Means means;
     double W = 0.0;
     double Throughput = 0.0;
     /* Initialize system */
@@ -24,7 +25,7 @@ void simulate(System *sys)
             End_time = clock + END_TIME;
             reached_end = 0;
             oldclock = clock;
-            reinitialize_stations(sys->stations);
+            reset_stations_measurements(sys->stations);
         }
         /* Print report (if DEBUG is ON) and THEN run */
         do {
@@ -37,27 +38,27 @@ void simulate(System *sys)
         // Compute final statistics
         compute_statistics(sys);
         T = clock - oldclock;
-        meanT = (i*meanT + T)/(i+1);
-        W = (i*W + sys->stations[1].statistics.waiting_area)/(i+1);
-        Throughput = (i*Throughput + sys->stations[1].departures_n)/(i+1);
-        mean_arrivals_at1 = (i*mean_arrivals_at1 + sys->stations[1].arrivals_n)/(i+1);
-        fprintf(stderr, "mean_arrivals_at1 = %lf\n", mean_arrivals_at1);
+        means.mean_observation_time = (i*means.mean_observation_time + T)/(i+1);
+        means.mean_waiting_area[1] = (i*means.mean_waiting_area[1] + sys->stations[1].measures.waiting_area)/(i+1);
+        means.mean_departures[1] = (i*means.mean_departures[1] + sys->stations[1].measures.departures_n)/(i+1);
+        means.mean_arrivals[1] = (i*means.mean_arrivals[1] + sys->stations[1].measures.arrivals_n)/(i+1);
+        fprintf(stderr, "mean_arrivals_at1 = %d\n", means.mean_arrivals[1]);
 
         /* Final prints */
         system_recap(*sys);
 
-        fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
-        fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
-        fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
+        fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
+        fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->statistics.mean_number_jobs[1]);
+        fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
 
-        fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].departures_n);
-        fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].arrivals_n);
+        fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
+        fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
         fprintf(stderr, "Final clock: %lf\n", clock);
-        fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/T);
-        fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
+        fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].measures.departures_n/T);
+        fprintf(stderr, "Mean waiting: %lf\n", sys->statistics.mean_waiting_time[1]);
     }
-    W = W/mean_arrivals_at1;
-    Throughput = Throughput/meanT;
+    W = means.mean_waiting_area[1]/means.mean_departures[1];
+    Throughput = means.mean_arrivals[1]/means.mean_observation_time;
     fprintf(stderr, "W = %lf\n", W);
     fprintf(stderr, "Throughput = %lf\n", Throughput);
 }
@@ -89,16 +90,15 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].queue.tail = NULL;
     stat[0].jobs_in_service = 0;
     stat[0].jobs_in_queue = 0;
-    stat[0].arrivals_n = 0;
-    stat[0].departures_n = 0;
     stat[0].server_n = 0;  // Does not apply
     stat[0].coffe_prob = 0.0;  // Does not apply
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
-    stat[0].statistics.area_jobs = 0.0;
-    stat[0].statistics.mean_number_jobs = 0.0;
-    stat[0].statistics.waiting_area = 0.0;
-    stat[0].statistics.mean_waiting_time = 0.0;
+
+    stat[0].measures.arrivals_n = 0;
+    stat[0].measures.departures_n = 0;
+    stat[0].measures.waiting_area = 0.0;
+
 
     stat[1].type = 'S';
     stat[1].distribution = 'e';
@@ -109,35 +109,26 @@ void initialize_stations(Station **pointer_to_stations)
     stat[1].queue.tail = NULL;
     stat[1].jobs_in_service = 0;
     stat[1].jobs_in_queue = 0;
-    stat[1].arrivals_n = 0;
-    stat[1].departures_n = 0;
     stat[1].server_n = 1;
     stat[1].coffe_prob = 0.0;
     stat[1].coffe_distribution = 'e';
     stat[1].coffe_parameter = 10;
-    stat[1].statistics.area_jobs = 0.0;
-    stat[1].statistics.mean_number_jobs = 0.0;
-    stat[1].statistics.waiting_area = 0.0;
-    stat[1].statistics.mean_waiting_time = 0.0;
+
+    stat[1].measures.arrivals_n = 0;
+    stat[1].measures.departures_n = 0;
+    stat[1].measures.waiting_area = 0.0;
 }
 
-void reinitialize_stations(Station *stations)
+void reset_stations_measurements(Station *stations)
 {
-    Station *stat = stations;
-
-    stat[0].arrivals_n = 0;
-    stat[0].departures_n = 0;
-    stat[0].statistics.area_jobs = 0.0;
-    stat[0].statistics.mean_number_jobs = 0.0;
-    stat[0].statistics.waiting_area = 0.0;
-    stat[0].statistics.mean_waiting_time = 0.0;
-
-    stat[1].arrivals_n = 0;
-    stat[1].departures_n = 0;
-    stat[1].statistics.area_jobs = 0.0;
-    stat[1].statistics.mean_number_jobs = 0.0;
-    stat[1].statistics.waiting_area = 0.0;
-    stat[1].statistics.mean_waiting_time = 0.0;
+    int i;
+    for (i = 0; i < N_STATIONS; i++)
+    {
+        Measurements *measures = &(stations[i].measures);
+        measures->arrivals_n = 0;
+        measures->departures_n = 0;
+        measures->waiting_area = 0.0;
+    }
 }
 
 void starting_events(Tree *pointer_to_fel, Station *stations)
@@ -176,7 +167,7 @@ int engine(System *sys)
     if (clock >= End_time)
         reached_end = 1;
 
-    update_statistics(sys, delta);
+    update_stations_measurements(sys, delta);
 
     switch(new_event->event.type)
     {
@@ -209,7 +200,7 @@ void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel)
     int station_index = node_event->event.station;
     char station_type = stations[station_index].type;
 
-    stations[station_index].arrivals_n++;
+    stations[station_index].measures.arrivals_n++;
 
     switch (station_type)
     {
@@ -268,7 +259,7 @@ void departure(Node* node_event, Station *stations, Tree *pointer_to_fel)
     int station_index = node_event->event.station;
     char station_type = stations[station_index].type;
 
-    stations[station_index].departures_n++;
+    stations[station_index].measures.departures_n++;
 
     switch (station_type)
     {
@@ -409,8 +400,8 @@ void copy_stations(Station *stations, Station **new_stations_address)
         (*new_stations_address)[i].queue.tail =             stat[i].queue.tail;
         (*new_stations_address)[i].jobs_in_service =        stat[i].jobs_in_service;
         (*new_stations_address)[i].jobs_in_queue =          stat[i].jobs_in_queue;
-        (*new_stations_address)[i].arrivals_n =             stat[i].arrivals_n;
-        (*new_stations_address)[i].departures_n =           stat[i].departures_n;
+        (*new_stations_address)[i].measures.arrivals_n =    stat[i].measures.arrivals_n;
+        (*new_stations_address)[i].measures.departures_n =  stat[i].measures.departures_n;
         (*new_stations_address)[i].server_n =               stat[i].server_n;
         (*new_stations_address)[i].coffe_prob =             stat[i].coffe_prob;
         (*new_stations_address)[i].coffe_distribution =     stat[i].coffe_distribution;

@@ -158,13 +158,13 @@ void print_all_stations_h(Station *stations)
             fprintf(stderr, "in queue:\t%d\t\t", stations[i].jobs_in_queue);
         fprintf(stderr, "\n");
         for (i = j; i < lim; i++)
-            fprintf(stderr, "tot arrivals:\t%d\t\t", stations[i].arrivals_n);
+            fprintf(stderr, "tot arrivals:\t%d\t\t", stations[i].measures.arrivals_n);
         fprintf(stderr, "\n");
         for (i = j; i < lim; i++)
-            fprintf(stderr, "tot departures:\t%d\t\t", stations[i].departures_n);
+            fprintf(stderr, "tot departures:\t%d\t\t", stations[i].measures.departures_n);
         fprintf(stderr, "\n");
         for (i = j; i < lim; i++)
-            fprintf(stderr, "area_jobs:\t%-16.5lf", stations[i].statistics.area_jobs);
+            fprintf(stderr, "waiting area:\t%-16.5lf", stations[i].measures.waiting_area);
         fprintf(stderr, "\n");
         fprintf(stderr, "\n");
     }
