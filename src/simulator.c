@@ -24,8 +24,7 @@ void simulate()
 
 
     // Compute final statistics
-    sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (clock);
-    sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (clock);
+    compute_statistics(sys);
 
     /* Final prints */
     system_recap(system);
@@ -38,6 +37,7 @@ void simulate()
     fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].arrivals_n);
     fprintf(stderr, "Final clock: %lf\n", clock);
     fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/clock);
+    fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
 
 }
 
@@ -75,6 +75,8 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_parameter = 0.0;  // Does not apply
     stat[0].statistics.area_jobs = 0.0;
     stat[0].statistics.mean_number_jobs = 0.0;
+    stat[0].statistics.waiting_area = 0.0;
+    stat[0].statistics.mean_waiting_time = 0.0;
 
     stat[1].type = 'S';
     stat[1].distribution = 'e';
@@ -93,6 +95,8 @@ void initialize_stations(Station **pointer_to_stations)
     stat[1].coffe_parameter = 10;
     stat[1].statistics.area_jobs = 0.0;
     stat[1].statistics.mean_number_jobs = 0.0;
+    stat[1].statistics.waiting_area = 0.0;
+    stat[1].statistics.mean_waiting_time = 0.0;
 }
 
 void starting_events(Tree *pointer_to_fel, Station *stations)
@@ -131,10 +135,7 @@ int engine(System *sys)
     if (clock >= End_time)
         reached_end = 1;
 
-    update_statistics(sys);
-
-    stations[0].statistics.area_jobs += delta*(stations[0].jobs_in_service + stations[0].jobs_in_queue);
-    stations[1].statistics.area_jobs += delta*(stations[1].jobs_in_service + stations[1].jobs_in_queue);
+    update_statistics(sys, delta);
 
     switch(new_event->event.type)
     {

@@ -11,7 +11,6 @@ int main(int argc, char const *argv[])
 
     simulate();
 
-    compute_statistics();
     report();
 
     return 0;
