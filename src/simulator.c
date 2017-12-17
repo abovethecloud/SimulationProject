@@ -38,7 +38,7 @@ void simulate(System *sys)
         // Compute final statistics
         compute_statistics(sys);
         W += sys->stations[1].statistics.mean_waiting_time;
-        Throughput += sys->stations[1].departures_n/T;
+        Throughput = (i*Throughput + sys->stations[1].departures_n)/(i+1);
         /* Final prints */
         system_recap(*sys);
 
@@ -53,7 +53,7 @@ void simulate(System *sys)
         fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
     }
     W = W/30.0;
-    Throughput = Throughput/30;
+    Throughput = Throughput/meanT;
     fprintf(stderr, "W = %lf\n", W);
     fprintf(stderr, "Throughput = %lf\n", Throughput);
 }
