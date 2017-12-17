@@ -13,7 +13,7 @@
  * simulates the scenario.
  * calls "initialize" to initialize the structure.
  */
-void simulate();
+void simulate(System *sys);
 
 /*
  * Function:  initialize

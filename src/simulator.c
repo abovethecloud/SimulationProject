@@ -6,18 +6,15 @@ Node* available;
 double clock = 0;
 int reached_end = 0;
 
-void simulate()
+void simulate(System *sys)
 {
-    System system;
-    System *sys = &system;
-
     /* Initialize system */
     initialize(sys);
 
     /* Print report (if DEBUG is ON) and THEN run */
     do {
         #ifdef DEBUG  // Print DEBUG
-        system_recap(system);
+        system_recap(*sys);
         getchar();
         #endif
     } while (!engine(sys));
@@ -27,7 +24,7 @@ void simulate()
     compute_statistics(sys);
 
     /* Final prints */
-    system_recap(system);
+    system_recap(*sys);
 
     fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
     fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);

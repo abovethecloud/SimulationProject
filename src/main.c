@@ -9,7 +9,8 @@ int main(int argc, char const *argv[])
 {
     PlantSeeds(1);
 
-    simulate();
+    System sys;
+    simulate(&sys);
 
     report();
 
