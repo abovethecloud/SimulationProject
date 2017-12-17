@@ -98,25 +98,25 @@ void print_fel_h(Node *fel)
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
-            fprintf(stderr, "Name:\t%s\t\t", node->event.name);
+            fprintf(stderr, "Name: %s\t\t", node->event.name);
             i++;
         }
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
-            fprintf(stderr, "Type:\t%s\t\t", type[node->event.type]);
+            fprintf(stderr, "Type: %s\t\t", type[node->event.type]);
             i++;
         }
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
-            fprintf(stderr, "Stat:\t%d\t\t", node->event.station);
+            fprintf(stderr, "Stat: %d\t\t\t", node->event.station);
             i++;
         }
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
-            fprintf(stderr, "Time:\t%-15.6lf\t", node->event.occur_time);
+            fprintf(stderr, "Time: %-17.5lf\t", node->event.occur_time);
             i++;
         }
         fprintf(stderr, "\n");

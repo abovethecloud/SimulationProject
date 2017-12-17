@@ -38,10 +38,7 @@ void simulate(System *sys)
         // Compute final statistics
         compute_statistics(sys);
         T = clock - oldclock;
-        means.mean_observation_time = (i*means.mean_observation_time + T)/(i+1);
-        means.mean_waiting_area[1] = (i*means.mean_waiting_area[1] + sys->stations[1].measures.waiting_area)/(i+1);
-        means.mean_departures[1] = (i*means.mean_departures[1] + sys->stations[1].measures.departures_n)/(i+1);
-        means.mean_arrivals[1] = (i*means.mean_arrivals[1] + sys->stations[1].measures.arrivals_n)/(i+1);
+        update_mean_measures(&means, sys->stations, i);
         fprintf(stderr, "mean_arrivals_at1 = %d\n", means.mean_arrivals[1]);
 
         /* Final prints */
