@@ -102,5 +102,6 @@ extern double clock;
 extern double oldclock;
 extern double T;
 extern double meanT;
+extern double mean_arrivals_at1;
 
 #endif

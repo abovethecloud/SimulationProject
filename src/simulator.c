@@ -5,7 +5,9 @@ double End_time = END_TIME;
 Node* available;
 double clock = 0.0;
 double oldclock = 0.0;
-double T = 0.0, meanT = 0.0;;
+double T = 0.0, meanT = 0.0;
+double mean_arrivals_at1 = 0.0;
+
 int reached_end = 0;
 
 void simulate(System *sys)
@@ -32,13 +34,15 @@ void simulate(System *sys)
             #endif
         } while (!engine(sys));
 
-        T = clock - oldclock;
-        meanT = (i*meanT + T)/(i+1);
-
         // Compute final statistics
         compute_statistics(sys);
-        W += sys->stations[1].statistics.mean_waiting_time;
+        T = clock - oldclock;
+        meanT = (i*meanT + T)/(i+1);
+        W = (i*W + sys->stations[1].statistics.waiting_area)/(i+1);
         Throughput = (i*Throughput + sys->stations[1].departures_n)/(i+1);
+        mean_arrivals_at1 = (i*mean_arrivals_at1 + sys->stations[1].arrivals_n)/(i+1);
+        fprintf(stderr, "mean_arrivals_at1 = %lf\n", mean_arrivals_at1);
+
         /* Final prints */
         system_recap(*sys);
 
@@ -52,7 +56,7 @@ void simulate(System *sys)
         fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/T);
         fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
     }
-    W = W/30.0;
+    W = W/mean_arrivals_at1;
     Throughput = Throughput/meanT;
     fprintf(stderr, "W = %lf\n", W);
     fprintf(stderr, "Throughput = %lf\n", Throughput);
