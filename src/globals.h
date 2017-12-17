@@ -99,5 +99,7 @@ typedef struct system
 
 extern Node* available;
 extern double clock;
+extern double oldclock;
+extern double T;
 
 #endif

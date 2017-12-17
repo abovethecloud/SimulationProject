@@ -2,8 +2,8 @@
 
 void compute_statistics(System *sys)
 {
-    sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (clock);
-    sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (clock);
+    sys->stations[0].statistics.mean_number_jobs = sys->stations[0].statistics.area_jobs / (T);
+    sys->stations[1].statistics.mean_number_jobs = sys->stations[1].statistics.area_jobs / (T);
 
     sys->stations[1].statistics.mean_waiting_time = sys->stations[1].statistics.waiting_area / ((double) sys->stations[1].arrivals_n);
 }

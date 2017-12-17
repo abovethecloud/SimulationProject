@@ -1,47 +1,67 @@
 #include "simulator.h"
 
 
-const double End_time = END_TIME;
+double End_time = END_TIME;
 Node* available;
-double clock = 0;
+double clock = 0.0;
+double oldclock = 0.0;
+double T = 0.0;
 int reached_end = 0;
 
 void simulate(System *sys)
 {
+    int i;
+    double W = 0.0;
+    double Throughput = 0.0;
     /* Initialize system */
     initialize(sys);
 
-    /* Print report (if DEBUG is ON) and THEN run */
-    do {
-        #ifdef DEBUG  // Print DEBUG
+    for (i = 0; i < 30; i++)
+    {
+        if (i>0){
+            End_time = clock + END_TIME;
+            reached_end = 0;
+            oldclock = clock;
+            reinitialize_stations(sys->stations);
+        }
+        /* Print report (if DEBUG is ON) and THEN run */
+        do {
+            #ifdef DEBUG  // Print DEBUG
+            system_recap(*sys);
+            getchar();
+            #endif
+        } while (!engine(sys));
+
+        T = clock - oldclock;
+
+        // Compute final statistics
+        compute_statistics(sys);
+        W += sys->stations[1].statistics.mean_waiting_time;
+        Throughput += sys->stations[1].departures_n/T;
+        /* Final prints */
         system_recap(*sys);
-        getchar();
-        #endif
-    } while (!engine(sys));
 
+        fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
+        fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
+        fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
 
-    // Compute final statistics
-    compute_statistics(sys);
-
-    /* Final prints */
-    system_recap(*sys);
-
-    fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->stations[0].statistics.mean_number_jobs);
-    fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->stations[1].statistics.mean_number_jobs);
-    fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->stations[1].statistics.mean_number_jobs + sys->stations[0].statistics.mean_number_jobs);
-
-    fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].departures_n);
-    fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].arrivals_n);
-    fprintf(stderr, "Final clock: %lf\n", clock);
-    fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/clock);
-    fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
-
+        fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].departures_n);
+        fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].arrivals_n);
+        fprintf(stderr, "Final clock: %lf\n", clock);
+        fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].departures_n/T);
+        fprintf(stderr, "Mean waiting: %lf\n", sys->stations[1].statistics.mean_waiting_time);
+    }
+    W = W/30.0;
+    Throughput = Throughput/30;
+    fprintf(stderr, "W = %lf\n", W);
+    fprintf(stderr, "Throughput = %lf\n", Throughput);
 }
 
 void initialize(System *sys_point)
 {
     /* Initialize clock, FEL and node pool and allocate memory for stations */
     clock = 0;
+    oldclock = 0;
     sys_point->event_counter = 0;
     initialize_stations(&(sys_point->stations));
     sys_point->fel = NULL;
@@ -90,6 +110,25 @@ void initialize_stations(Station **pointer_to_stations)
     stat[1].coffe_prob = 0.0;
     stat[1].coffe_distribution = 'e';
     stat[1].coffe_parameter = 10;
+    stat[1].statistics.area_jobs = 0.0;
+    stat[1].statistics.mean_number_jobs = 0.0;
+    stat[1].statistics.waiting_area = 0.0;
+    stat[1].statistics.mean_waiting_time = 0.0;
+}
+
+void reinitialize_stations(Station *stations)
+{
+    Station *stat = stations;
+
+    stat[0].arrivals_n = 0;
+    stat[0].departures_n = 0;
+    stat[0].statistics.area_jobs = 0.0;
+    stat[0].statistics.mean_number_jobs = 0.0;
+    stat[0].statistics.waiting_area = 0.0;
+    stat[0].statistics.mean_waiting_time = 0.0;
+
+    stat[1].arrivals_n = 0;
+    stat[1].departures_n = 0;
     stat[1].statistics.area_jobs = 0.0;
     stat[1].statistics.mean_number_jobs = 0.0;
     stat[1].statistics.waiting_area = 0.0;

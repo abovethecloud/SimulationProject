@@ -24,6 +24,8 @@ void initialize(System *sys_point);
 
 void initialize_stations(Station **pointer_to_stations);
 
+void reinitialize_stations(Station *stations);
+
 void starting_events(Tree *pointer_to_fel, Station *stations);
 
 double getArrivalFromOutside();
