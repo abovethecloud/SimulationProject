@@ -101,5 +101,6 @@ extern Node* available;
 extern double clock;
 extern double oldclock;
 extern double T;
+extern double meanT;
 
 #endif

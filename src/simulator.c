@@ -5,7 +5,7 @@ double End_time = END_TIME;
 Node* available;
 double clock = 0.0;
 double oldclock = 0.0;
-double T = 0.0;
+double T = 0.0, meanT = 0.0;;
 int reached_end = 0;
 
 void simulate(System *sys)
@@ -33,6 +33,7 @@ void simulate(System *sys)
         } while (!engine(sys));
 
         T = clock - oldclock;
+        meanT = (i*meanT + T)/(i+1);
 
         // Compute final statistics
         compute_statistics(sys);
