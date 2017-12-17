@@ -15,7 +15,7 @@
 /*==================== EDIT THOSE VALUES ACCORDINGLY ====================*/
 // Remember to update the following values as stations and clients are added!!!
 #define N_STATIONS 2
-#define END_TIME 1000000
+#define END_TIME 10000000
 #define N_CLIENTS 10
 
 // Graphical parameters. Number of horizontal stations or events per row
