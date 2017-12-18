@@ -35,25 +35,25 @@ void simulate(System *sys)
             #endif
         } while (!engine(sys));
 
-        // Compute final statistics
-        compute_statistics(sys);
+        // Update Measurements every Regeneration Cycle
         T = clock - oldclock;
         update_mean_measures(&means, sys->stations, i);
-        fprintf(stderr, "mean_arrivals_at1 = %d\n", means.mean_arrivals[1]);
+        fprintf(stderr, "mean_arrivals_at1 = %lf\n", means.mean_arrivals[1]);
 
         /* Final prints */
         system_recap(*sys);
-
-        fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
-        fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->statistics.mean_number_jobs[1]);
-        fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
 
         fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
         fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
         fprintf(stderr, "Final clock: %lf\n", clock);
         fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].measures.departures_n/T);
-        fprintf(stderr, "Mean waiting: %lf\n", sys->statistics.mean_waiting_time[1]);
     }
+    compute_statistics(sys, means);
+    fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
+    fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->statistics.mean_number_jobs[1]);
+    fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
+    fprintf(stderr, "Mean waiting: %lf\n", sys->statistics.mean_waiting_time[1]);
+
     W = means.mean_waiting_area[1]/means.mean_departures[1];
     Throughput = means.mean_arrivals[1]/means.mean_observation_time;
     fprintf(stderr, "W = %lf\n", W);

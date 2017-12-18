@@ -65,8 +65,16 @@ typedef Node* Tree;
 typedef struct statistic_measures
 {
     double mean_number_jobs[N_STATIONS];
+    double mean_squared_number_jobs[N_STATIONS];
+    double var_number_jobs[N_STATIONS];
+
     double mean_waiting_time[N_STATIONS];
-    double throughput[N_STATIONS];
+    double mean_squared_waiting_time[N_STATIONS];
+    double var_waiting_time[N_STATIONS];
+
+    double mean_throughput[N_STATIONS];
+    double mean_squared_throughput[N_STATIONS];
+    double var_throughput[N_STATIONS];
 } Statistics;
 
 typedef struct measurements
@@ -78,10 +86,20 @@ typedef struct measurements
 
 typedef struct run_means
 {
+    double sum_observation_time;
+    double squared_sum_observation_time;
     double mean_observation_time;
 
-    int mean_arrivals[N_STATIONS];
-    int mean_departures[N_STATIONS];
+    int sum_arrivals[N_STATIONS];
+    int squared_sum_arrivals[N_STATIONS];
+    double mean_arrivals[N_STATIONS];
+
+    int sum_departures[N_STATIONS];
+    int squared_sum_departures[N_STATIONS];
+    double mean_departures[N_STATIONS];
+
+    double sum_waiting_area[N_STATIONS];
+    double squared_sum_waiting_area[N_STATIONS];
     double mean_waiting_area[N_STATIONS];
 } Means;
 

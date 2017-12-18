@@ -3,7 +3,7 @@
 
 #include "globals.h"
 
-void compute_statistics(System *sys);
+void compute_statistics(System *sys, Means means);
 
 void update_stations_measurements(System *sys, double delta);
 
