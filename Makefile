@@ -24,10 +24,12 @@ rm       = rm -f
 
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(@D)  # If directory BINDIR does not exist, create it (only works in UNIX environment and it is useful when cloning with git)
 	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
 	@echo "Linking complete!"
 
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(INCLUDES)
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(INCLUDES)  # Check for changes in both .c and .h files. In case, recompile following dependencies
+	@mkdir -p $(@D)  # If directory OBJDIR does not exist, create it (only works in UNIX environment and it is useful when cloning with git)
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 	@echo "$(CC) $(CFLAGS) -c $< -o $@"
