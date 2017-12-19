@@ -1,10 +1,10 @@
 #include "utils.h"
 
 
-int approx_equal(double d1, double d2)
+int approx_equal(long double d1, long double d2)
 {
-    const double epsilon = 0.0000001;  // To compare double values
-    if (fabs(d1-d2) < epsilon)
+    const long double epsilon = 0.0000001;  // To compare long double values
+    if (fabsl(d1-d2) < epsilon)
         return 1;
     else
         return 0;

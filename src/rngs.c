@@ -49,7 +49,7 @@ static int  stream        = 0;          /* stream index, 0 is the default */
 static int  initialized   = 0;          /* test for stream initialization */
 
 
-   double Random(void)
+   long double Random(void)
 /* ----------------------------------------------------------------
  * Random returns a pseudo-random real number uniformly distributed
  * between 0.0 and 1.0.
@@ -65,7 +65,7 @@ static int  initialized   = 0;          /* test for stream initialization */
     seed[stream] = t;
   else
     seed[stream] = t + MODULUS;
-  return ((double) seed[stream] / MODULUS);
+  return ((long double) seed[stream] / MODULUS);
 }
 
 
@@ -159,7 +159,7 @@ static int  initialized   = 0;          /* test for stream initialization */
 {
   long   i;
   long   x;
-  double u;
+  long double u;
   char   ok = 0;
 
   SelectStream(0);                  /* select the default stream */

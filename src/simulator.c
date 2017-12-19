@@ -1,11 +1,11 @@
 #include "simulator.h"
 
 
-double End_time = END_TIME;
+long double End_time = END_TIME;
 Node* available;
-double clock = 0.0;
-double oldclock = 0.0;
-double T = 0.0;
+long double clock = 0.0;
+long double oldclock = 0.0;
+long double T = 0.0;
 int reg_cycle_n = MIN_REG_N;
 
 int reached_end = 0;
@@ -13,7 +13,7 @@ int reached_end = 0;
 void simulate(System *sys)
 {
     int i;
-    Means means;
+    Means means = {0};
 
     /* Initialize system */
     initialize(sys);
@@ -37,22 +37,22 @@ void simulate(System *sys)
         // Update Measurements every Regeneration Cycle
         T = clock - oldclock;
         update_mean_measures(&means, sys->stations, i);
-        fprintf(stderr, "waiting area = %40.20lf\n", means.squared_sum_waiting_area[1]);
+        fprintf(stderr, "waiting area = %40.20Lf\n", means.squared_sum_waiting_area[1]);
 
         /* Final prints */
         system_recap(*sys);
 
         fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
         fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
-        fprintf(stderr, "Final clock: %lf\n", clock);
-        fprintf(stderr, "Throughput of station 1: %lf\n", sys->stations[1].measures.departures_n/T);
+        fprintf(stderr, "Final clock: %Lf\n", clock);
+        fprintf(stderr, "Throughput of station 1: %Lf\n", sys->stations[1].measures.departures_n/T);
     }
     compute_statistics(sys, means);
-    fprintf(stderr, "Mean number of Jobs at station 0: %lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
-    fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->statistics.mean_number_jobs[1]);
-    fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
-    fprintf(stderr, "Mean waiting: %lf\n", sys->statistics.mean_waiting_time[1]);
-    fprintf(stderr, "Waiting semi_interval: %lf\n", sys->statistics.semi_interval_waiting_time[1]);
+    fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
+    fprintf(stderr, "Mean number of Jobs at station 1: %Lf\n", sys->statistics.mean_number_jobs[1]);
+    fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
+    fprintf(stderr, "Mean waiting: %Lf\n", sys->statistics.mean_waiting_time[1]);
+    fprintf(stderr, "Waiting semi_interval: %Lf\n", sys->statistics.semi_interval_waiting_time[1]);
 }
 
 void initialize(System *sys_point)
@@ -154,8 +154,8 @@ int engine(System *sys)
     Node* new_event = event_pop(pointer_to_fel);
 
     /* update clock and check if reached End_time */
-    double oldtime = clock;
-    double delta = update_clock(new_event, oldtime);
+    long double oldtime = clock;
+    long double delta = update_clock(new_event, oldtime);
     if (clock >= End_time)
         reached_end = 1;
 
@@ -281,7 +281,7 @@ void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_
 void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to_fel)
 {
     int station_index = node_event->event.station;
-    double coffe_length = 0;
+    long double coffe_length = 0;
 
     stations[station_index].jobs_in_service--;  // Decrease the number of jobs in service for the station
 
@@ -311,9 +311,9 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
     schedule(node_event, pointer_to_fel);  // Schedule arrival to next station
 }
 
-double update_clock(Node* new_event, double oldtime)
+long double update_clock(Node* new_event, long double oldtime)
 {
-    double delta = 0.0;
+    long double delta = 0.0;
     clock = new_event->event.occur_time;
     delta = clock - oldtime;
     return delta;
@@ -323,10 +323,10 @@ int next_station(Station *stations, int current_station)
 {
     int i;
     SelectStream(255);  // Set separate stream for extraction of next station (255 since it's the last - and of course free - stream)
-    double extraction = Uniform(0.0, 1.0);
-    double *prob_to_stations = stations[current_station].prob_to_stations;
+    long double extraction = Uniform(0.0, 1.0);
+    long double *prob_to_stations = stations[current_station].prob_to_stations;
 
-    double cumulative_prob = 0.0;
+    long double cumulative_prob = 0.0;
 
     for (i = 0; i < N_STATIONS; i++)
     {
@@ -339,9 +339,9 @@ int next_station(Station *stations, int current_station)
     return -1;
 }
 
-double station_random_time(Station *stations, int station_index)
+long double station_random_time(Station *stations, int station_index)
 {
-    double service_time = 0;
+    long double service_time = 0;
 
     /* Select separate stream for each station arrival */
     SelectStream(station_index);
@@ -355,9 +355,9 @@ double station_random_time(Station *stations, int station_index)
     return service_time;
 }
 
-double coffe_break(Station *stations, int station_index)
+long double coffe_break(Station *stations, int station_index)
 {
-    double coffe_length = 0;
+    long double coffe_length = 0;
 
     SelectStream(station_index + N_STATIONS);  // Avoid overlappings
     if (Uniform(0, 1) < stations[station_index].coffe_prob)

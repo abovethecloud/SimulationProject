@@ -43,10 +43,10 @@ typedef struct event_notice
     char name[256];
     int type;
     int station;
-    double create_time;
-    double occur_time;
-    double arrival_time;
-    double service_time;
+    long double create_time;
+    long double occur_time;
+    long double arrival_time;
+    long double service_time;
 } EventNotice;
 
 typedef struct node
@@ -66,56 +66,56 @@ typedef Node* Tree;
 
 typedef struct statistic_measures
 {
-    double mean_number_jobs[N_STATIONS];
+    long double mean_number_jobs[N_STATIONS];
 
-    double mean_waiting_time[N_STATIONS];
-    double del_waiting_time[N_STATIONS];
-    double semi_interval_waiting_time[N_STATIONS];
+    long double mean_waiting_time[N_STATIONS];
+    long double del_waiting_time[N_STATIONS];
+    long double semi_interval_waiting_time[N_STATIONS];
 
-    double mean_throughput[N_STATIONS];
+    long double mean_throughput[N_STATIONS];
 } Statistics;
 
 typedef struct measurements
 {
     int arrivals_n;
     int departures_n;
-    double waiting_area;
+    long double waiting_area;
 } Measurements;
 
 typedef struct run_means
 {
-    double sum_observation_time;
-    double squared_sum_observation_time;
-    double mean_observation_time;
+    long double sum_observation_time;
+    long double squared_sum_observation_time;
+    long double mean_observation_time;
 
     int sum_arrivals[N_STATIONS];
-    double squared_sum_arrivals[N_STATIONS];
-    double mean_arrivals[N_STATIONS];
+    long double squared_sum_arrivals[N_STATIONS];
+    long double mean_arrivals[N_STATIONS];
 
     int sum_departures[N_STATIONS];
-    double squared_sum_departures[N_STATIONS];
-    double mean_departures[N_STATIONS];
+    long double squared_sum_departures[N_STATIONS];
+    long double mean_departures[N_STATIONS];
 
-    double sum_waiting_area[N_STATIONS];
-    double squared_sum_waiting_area[N_STATIONS];
-    double mean_waiting_area[N_STATIONS];
+    long double sum_waiting_area[N_STATIONS];
+    long double squared_sum_waiting_area[N_STATIONS];
+    long double mean_waiting_area[N_STATIONS];
 
-    double sum_of_product_waiting_and_arrivals[N_STATIONS];
+    long double sum_of_product_waiting_and_arrivals[N_STATIONS];
 } Means;
 
 typedef struct station
 {
     char type;
     char distribution;
-    double parameter;
-    double prob_to_stations[N_STATIONS];
+    long double parameter;
+    long double prob_to_stations[N_STATIONS];
     Queue queue;
     int jobs_in_service;
     int jobs_in_queue;
     int server_n;  // Only for servers
-    double coffe_prob;
+    long double coffe_prob;
     char coffe_distribution;
-    double coffe_parameter;
+    long double coffe_parameter;
     Measurements measures;
 } Station;
 
@@ -130,11 +130,11 @@ typedef struct system
 
 
 extern Node* available;
-extern double clock;
-extern double oldclock;
-extern double T;
-extern double meanT;
-extern double mean_arrivals_at1;
+extern long double clock;
+extern long double oldclock;
+extern long double T;
+extern long double meanT;
+extern long double mean_arrivals_at1;
 extern int reg_cycle_n;
 
 #endif

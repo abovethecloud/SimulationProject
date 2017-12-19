@@ -58,7 +58,7 @@ void schedule(Node* node_event, Tree *pointer_to_fel)
 {
   int n_equal = 0;
   int ev_type = node_event->event.type;
-  double ev_time = node_event->event.occur_time;
+  long double ev_time = node_event->event.occur_time;
 
   Node *first_equal = NULL, *last_equal = NULL;
   Node *prev = NULL, *nex = NULL;

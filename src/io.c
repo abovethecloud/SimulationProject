@@ -41,7 +41,7 @@ void print_tree(Tree tree)
             EventNotice event = point_to_next_node_in_tree->event;
             fprintf(stderr, "Event in position %d:\n", i);
             fprintf(stderr, "\tEvent type: %d\n", event.type);
-            fprintf(stderr, "\tEvent time: %lf\n", event.occur_time);
+            fprintf(stderr, "\tEvent time: %Lf\n", event.occur_time);
             fprintf(stderr, "\tEvent in station: %d\n", event.station);
             point_to_next_node_in_tree = point_to_next_node_in_tree->previous;
             i++;
@@ -63,7 +63,7 @@ void print_fel_v(Node *fel) {
             fprintf(stderr, "Event in position %d:\n", i);
             fprintf(stderr, "\tEvent name: %s\n", event.name);
             fprintf(stderr, "\tEvent type: %d\n", event.type);
-            fprintf(stderr, "\tEvent time: %lf\n", event.occur_time);
+            fprintf(stderr, "\tEvent time: %Lf\n", event.occur_time);
             fprintf(stderr, "\tEvent in station: %d\n", event.station);
             next = next->next;
             i++;
@@ -116,7 +116,7 @@ void print_fel_h(Node *fel)
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
-            fprintf(stderr, "Time: %-17.5lf\t", node->event.occur_time);
+            fprintf(stderr, "Time: %-17.5Lf\t", node->event.occur_time);
             i++;
         }
         fprintf(stderr, "\n");
@@ -164,7 +164,7 @@ void print_all_stations_h(Station *stations)
             fprintf(stderr, "tot departures:\t%d\t\t", stations[i].measures.departures_n);
         fprintf(stderr, "\n");
         for (i = j; i < lim; i++)
-            fprintf(stderr, "waiting area:\t%-16.5lf", stations[i].measures.waiting_area);
+            fprintf(stderr, "waiting area:\t%-16.5Lf", stations[i].measures.waiting_area);
         fprintf(stderr, "\n");
         fprintf(stderr, "\n");
     }
@@ -174,7 +174,7 @@ void system_recap(System sys)
 {
     fprintf(stderr, "\n\n");
     fprintf(stderr, "============================================================================\n");
-    fprintf(stderr, "========================= Clock = %16.5lf =========================\n", clock);
+    fprintf(stderr, "========================= Clock = %16.5Lf =========================\n", clock);
     fprintf(stderr, "============================================================================\n");
     fprintf(stderr, "\n");
     print_all_stations_h(sys.stations);

@@ -28,9 +28,9 @@ void reset_stations_measurements(Station *stations);
 
 void starting_events(Tree *pointer_to_fel, Station *stations);
 
-double getArrivalFromOutside();
+long double getArrivalFromOutside();
 
-double getServiceFromOutside();
+long double getServiceFromOutside();
 
 /*
  * Function: engine
@@ -54,7 +54,7 @@ void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_
 
 void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
-double update_clock(Node* new_event, double oldtime);
+long double update_clock(Node* new_event, long double oldtime);
 
 /*
  * Function:  next_station
@@ -69,9 +69,9 @@ double update_clock(Node* new_event, double oldtime);
  */
 int next_station(Station *stations, int current_station);
 
-double station_random_time(Station *stations, int station_index);
+long double station_random_time(Station *stations, int station_index);
 
-double coffe_break(Station *stations, int station_index);
+long double coffe_break(Station *stations, int station_index);
 
 void copy_stations(Station *stations, Station **new_stations_address);
 
