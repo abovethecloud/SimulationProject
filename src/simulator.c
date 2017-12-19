@@ -79,7 +79,8 @@ void initialize_stations(Station **pointer_to_stations)
 
     stat[0].type = 'D';
     stat[0].distribution = 'e';
-    stat[0].parameter = 60.0;
+    stat[0].parameters[0] = 60.0;
+    stat[0].parameters[1] = 0.0;
     stat[0].prob_to_stations[0] = 0.0;
     stat[0].prob_to_stations[1] = 1.0;
     stat[0].prob_to_stations[2] = 0.0;
@@ -94,14 +95,11 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_prob = 0.0;  // Does not apply
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
-    stat[0].measures.arrivals_n = 0;
-    stat[0].measures.departures_n = 0;
-    stat[0].measures.waiting_area = 0.0;
-
 
     stat[1].type = 'S';
     stat[1].distribution = 'e';
-    stat[1].parameter = 10.0;
+    stat[1].parameters[0] = 10.0;
+    stat[1].parameters[1] = 0.0;
     stat[1].prob_to_stations[0] = 0.0;
     stat[1].prob_to_stations[1] = 0.9;
     stat[1].prob_to_stations[2] = 0.1;
@@ -116,13 +114,11 @@ void initialize_stations(Station **pointer_to_stations)
     stat[1].coffe_prob = 0.0;
     stat[1].coffe_distribution = '\0';
     stat[1].coffe_parameter = 0.0;
-    stat[1].measures.arrivals_n = 0;
-    stat[1].measures.departures_n = 0;
-    stat[1].measures.waiting_area = 0.0;
 
     stat[2].type = 'S';
     stat[2].distribution = 'e';
-    stat[2].parameter = 80.0;
+    stat[2].parameters[0] = 80.0;
+    stat[2].parameters[1] = 0.0;
     stat[2].prob_to_stations[0] = 0.0;
     stat[2].prob_to_stations[1] = 0.0;
     stat[2].prob_to_stations[2] = 0.0;
@@ -137,13 +133,11 @@ void initialize_stations(Station **pointer_to_stations)
     stat[2].coffe_prob = 0.0;
     stat[2].coffe_distribution = '\0';
     stat[2].coffe_parameter = 0.0;
-    stat[2].measures.arrivals_n = 0;
-    stat[2].measures.departures_n = 0;
-    stat[2].measures.waiting_area = 0.0;
 
     stat[3].type = 'S';
     stat[3].distribution = 'e';
-    stat[3].parameter = 100.0;
+    stat[3].parameters[0] = 100.0;
+    stat[3].parameters[1] = 0.0;
     stat[3].prob_to_stations[0] = 0.0;
     stat[3].prob_to_stations[1] = 1.0;
     stat[3].prob_to_stations[2] = 0.0;
@@ -158,13 +152,11 @@ void initialize_stations(Station **pointer_to_stations)
     stat[3].coffe_prob = 0.0;
     stat[3].coffe_distribution = '\0';
     stat[3].coffe_parameter = 0.0;
-    stat[3].measures.arrivals_n = 0;
-    stat[3].measures.departures_n = 0;
-    stat[3].measures.waiting_area = 0.0;
 
     stat[4].type = 'D';
     stat[4].distribution = 'e';
-    stat[4].parameter = 50.0;
+    stat[4].parameters[0] = 50.0;
+    stat[4].parameters[1] = 0.0;
     stat[4].prob_to_stations[0] = 0.6;
     stat[4].prob_to_stations[1] = 0.0;
     stat[4].prob_to_stations[2] = 0.0;
@@ -179,13 +171,11 @@ void initialize_stations(Station **pointer_to_stations)
     stat[4].coffe_prob = 0.0;  // Does not apply
     stat[4].coffe_distribution = '\0';  // Does not apply
     stat[4].coffe_parameter = 0.0;  // Does not apply
-    stat[4].measures.arrivals_n = 0;
-    stat[4].measures.departures_n = 0;
-    stat[4].measures.waiting_area = 0.0;
 
     stat[5].type = 'S';
     stat[5].distribution = 'e';
-    stat[5].parameter = 90.0;
+    stat[5].parameters[0] = 90.0;
+    stat[5].parameters[1] = 0.0;
     stat[5].prob_to_stations[0] = 1.0;
     stat[5].prob_to_stations[1] = 0.0;
     stat[5].prob_to_stations[2] = 0.0;
@@ -200,9 +190,8 @@ void initialize_stations(Station **pointer_to_stations)
     stat[5].coffe_prob = 0.0;
     stat[5].coffe_distribution = '\0';
     stat[5].coffe_parameter = 0.0;
-    stat[5].measures.arrivals_n = 0;
-    stat[5].measures.departures_n = 0;
-    stat[5].measures.waiting_area = 0.0;
+
+    reset_stations_measurements(stat);
 }
 
 void reset_stations_measurements(Station *stations)
@@ -456,8 +445,11 @@ long double station_random_time(Station *stations, int station_index)
 
     switch (stations[station_index].distribution)
     {
-        case 'e':
-            service_time = Exponential(stations[station_index].parameter);
+        case 'e':  // negative exponential
+            service_time = Exponential(stations[station_index].parameters[0]);
+        break;
+        case 'E':  // hyper-exponential
+            service_time = HyperExponential(0.8, stations[station_index].parameters[0], 0.2, stations[station_index].parameters[1]);
         break;
     }
     return service_time;
@@ -493,9 +485,14 @@ void copy_stations(Station *stations, Station **new_stations_address)
     {
         (*new_stations_address)[i].type =                   stat[i].type;
         (*new_stations_address)[i].distribution =           stat[i].distribution;
-        (*new_stations_address)[i].parameter =              stat[i].parameter;
+        (*new_stations_address)[i].parameters[0] =          stat[i].parameters[0];
+        (*new_stations_address)[i].parameters[1] =          stat[i].parameters[1];
         (*new_stations_address)[i].prob_to_stations[0] =    stat[i].prob_to_stations[0];
         (*new_stations_address)[i].prob_to_stations[1] =    stat[i].prob_to_stations[1];
+        (*new_stations_address)[i].prob_to_stations[2] =    stat[i].prob_to_stations[2];
+        (*new_stations_address)[i].prob_to_stations[3] =    stat[i].prob_to_stations[3];
+        (*new_stations_address)[i].prob_to_stations[4] =    stat[i].prob_to_stations[4];
+        (*new_stations_address)[i].prob_to_stations[5] =    stat[i].prob_to_stations[5];
         (*new_stations_address)[i].queue.head =             stat[i].queue.head;
         (*new_stations_address)[i].queue.tail =             stat[i].queue.tail;
         (*new_stations_address)[i].jobs_in_service =        stat[i].jobs_in_service;

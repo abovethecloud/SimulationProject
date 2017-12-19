@@ -108,7 +108,7 @@ typedef struct station
 {
     char type;
     char distribution;
-    long double parameter;
+    long double parameters[2];
     long double prob_to_stations[N_STATIONS];
     Queue queue;
     int jobs_in_service;

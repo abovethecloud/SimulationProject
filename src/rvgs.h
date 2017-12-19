@@ -19,6 +19,7 @@ long Poisson(long double m);
 
 long double Uniform(long double a, long double b);
 long double Exponential(long double m);
+long double HyperExponential(long double a, long double m1, long double b, long double m2);
 long double Erlang(long n, long double b);
 long double Normal(long double m, long double s);
 long double Lognormal(long double a, long double b);

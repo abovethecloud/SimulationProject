@@ -134,6 +134,22 @@
   return (-m * log(1.0 - Random()));
 }
 
+   long double HyperExponential(long double a, long double m1, long double b, long double m2)
+/* =========================================================
+ * Returns ...
+ * NOTE: everything must be > 0.0
+ * =========================================================
+ */
+{
+  long double r = Random();
+  long double he = 0.0;
+  if (r < a)
+    he = Exponential(m1);
+  else
+    he = Exponential(m2);
+  return he;
+}
+
    long double Erlang(long n, long double b)
 /* ==================================================
  * Returns an Erlang distributed positive real number.
