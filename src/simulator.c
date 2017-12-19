@@ -6,7 +6,7 @@ Node* available;
 double clock = 0.0;
 double oldclock = 0.0;
 double T = 0.0;
-double mean_arrivals_at1 = 0.0;
+int reg_cycle_n = MIN_REG_N;
 
 int reached_end = 0;
 
@@ -14,8 +14,7 @@ void simulate(System *sys)
 {
     int i;
     Means means;
-    double W = 0.0;
-    double Throughput = 0.0;
+
     /* Initialize system */
     initialize(sys);
 
@@ -38,7 +37,7 @@ void simulate(System *sys)
         // Update Measurements every Regeneration Cycle
         T = clock - oldclock;
         update_mean_measures(&means, sys->stations, i);
-        fprintf(stderr, "mean_arrivals_at1 = %lf\n", means.mean_arrivals[1]);
+        fprintf(stderr, "waiting area = %40.20lf\n", means.squared_sum_waiting_area[1]);
 
         /* Final prints */
         system_recap(*sys);
@@ -53,11 +52,7 @@ void simulate(System *sys)
     fprintf(stderr, "Mean number of Jobs at station 1: %lf\n", sys->statistics.mean_number_jobs[1]);
     fprintf(stderr, "Mean number of Jobs in system: %lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
     fprintf(stderr, "Mean waiting: %lf\n", sys->statistics.mean_waiting_time[1]);
-
-    W = means.mean_waiting_area[1]/means.mean_departures[1];
-    Throughput = means.mean_arrivals[1]/means.mean_observation_time;
-    fprintf(stderr, "W = %lf\n", W);
-    fprintf(stderr, "Throughput = %lf\n", Throughput);
+    fprintf(stderr, "Waiting semi_interval: %lf\n", sys->statistics.semi_interval_waiting_time[1]);
 }
 
 void initialize(System *sys_point)
@@ -318,7 +313,7 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
 
 double update_clock(Node* new_event, double oldtime)
 {
-    double delta = 0;
+    double delta = 0.0;
     clock = new_event->event.occur_time;
     delta = clock - oldtime;
     return delta;

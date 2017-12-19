@@ -18,6 +18,8 @@
 #define END_TIME 10000000
 #define N_CLIENTS 10
 
+#define MIN_REG_N 30
+
 // Graphical parameters. Number of horizontal stations or events per row
 #define MAX_STAT_COL 5  // Max number of stations per row
 #define MAX_EV_COL 10  // Max number of events per row
@@ -65,16 +67,12 @@ typedef Node* Tree;
 typedef struct statistic_measures
 {
     double mean_number_jobs[N_STATIONS];
-    double mean_squared_number_jobs[N_STATIONS];
-    double var_number_jobs[N_STATIONS];
 
     double mean_waiting_time[N_STATIONS];
-    double mean_squared_waiting_time[N_STATIONS];
-    double var_waiting_time[N_STATIONS];
+    double del_waiting_time[N_STATIONS];
+    double semi_interval_waiting_time[N_STATIONS];
 
     double mean_throughput[N_STATIONS];
-    double mean_squared_throughput[N_STATIONS];
-    double var_throughput[N_STATIONS];
 } Statistics;
 
 typedef struct measurements
@@ -91,16 +89,18 @@ typedef struct run_means
     double mean_observation_time;
 
     int sum_arrivals[N_STATIONS];
-    int squared_sum_arrivals[N_STATIONS];
+    double squared_sum_arrivals[N_STATIONS];
     double mean_arrivals[N_STATIONS];
 
     int sum_departures[N_STATIONS];
-    int squared_sum_departures[N_STATIONS];
+    double squared_sum_departures[N_STATIONS];
     double mean_departures[N_STATIONS];
 
     double sum_waiting_area[N_STATIONS];
     double squared_sum_waiting_area[N_STATIONS];
     double mean_waiting_area[N_STATIONS];
+
+    double sum_of_product_waiting_and_arrivals[N_STATIONS];
 } Means;
 
 typedef struct station
@@ -135,5 +135,6 @@ extern double oldclock;
 extern double T;
 extern double meanT;
 extern double mean_arrivals_at1;
+extern int reg_cycle_n;
 
 #endif
