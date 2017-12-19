@@ -17,14 +17,6 @@ void compute_statistics(System *sys, Means means)
             sqrtl(means.squared_sum_waiting_area[i] - 2*(sys->statistics.mean_waiting_time[i])*(means.sum_of_product_waiting_and_arrivals[i]) + (sys->statistics.mean_waiting_time[i])*(sys->statistics.mean_waiting_time[i])*(means.squared_sum_arrivals[i])) /
             (long double) means.sum_arrivals[i];
 
-
-        fprintf(stderr, "coeff: %Lf\n", (long double) reg_cycle_n/(reg_cycle_n -1));
-        fprintf(stderr, "Saa: %Lf\n", means.squared_sum_waiting_area[i]);
-        fprintf(stderr, "-2 * r * Sav: %Lf\n", -2*(sys->statistics.mean_waiting_time[i])*(means.sum_of_product_waiting_and_arrivals[i]));
-        fprintf(stderr, "r^2 * Svv: %Lf\n", (sys->statistics.mean_waiting_time[i])*(sys->statistics.mean_waiting_time[i])*(means.squared_sum_arrivals[i]));
-        fprintf(stderr, "NUM: %Lf\n", means.squared_sum_waiting_area[i] - 2*(sys->statistics.mean_waiting_time[i])*(means.sum_of_product_waiting_and_arrivals[i]) + (sys->statistics.mean_waiting_time[i])*(sys->statistics.mean_waiting_time[i])*(means.squared_sum_arrivals[i]));
-        fprintf(stderr, "Sv: %d\n", means.sum_arrivals[i]);
-
         sys->statistics.semi_interval_waiting_time[i] = t_st*sys->statistics.del_waiting_time[i];
     }
 }
@@ -49,10 +41,7 @@ void update_mean_measures(Means *means, Station *stations, int run)
     {
         //means->mean_waiting_area[i] = (run*means->mean_waiting_area[i] + stations[i].measures.waiting_area)/((long double)(run+1));
         means->sum_waiting_area[i] += stations[i].measures.waiting_area;
-            fprintf(stderr, "SUM: %40.20Lf\n", means->sum_waiting_area[i]);
         means->squared_sum_waiting_area[i] += powl(stations[i].measures.waiting_area, (long double)2.0);
-        fprintf(stderr, "SQUARED SUM = %40.20Lf\n", means->squared_sum_waiting_area[i]);
-        //getchar();
 
         //means->mean_departures[i] = (run*means->mean_departures[i] + stations[i].measures.departures_n)/((long double)(run+1));
         means->sum_departures[i] += stations[i].measures.departures_n;
@@ -63,7 +52,6 @@ void update_mean_measures(Means *means, Station *stations, int run)
         means->squared_sum_arrivals[i] += (long double) stations[i].measures.arrivals_n * stations[i].measures.arrivals_n;
 
         means->sum_of_product_waiting_and_arrivals[i] += stations[i].measures.waiting_area * ((long double) stations[i].measures.arrivals_n);
-        fprintf(stderr, "%Lf\n", means->sum_of_product_waiting_and_arrivals[i]);
     }
 
 }

@@ -53,6 +53,7 @@ void simulate(System *sys)
     fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
     fprintf(stderr, "Mean waiting: %Lf\n", sys->statistics.mean_waiting_time[1]);
     fprintf(stderr, "Waiting semi_interval: %Lf\n", sys->statistics.semi_interval_waiting_time[1]);
+    fprintf(stderr, "CONFIDENCE INTERVAL: [%13.10Lf, %13.10Lf]\n", sys->statistics.mean_waiting_time[1]-sys->statistics.semi_interval_waiting_time[1], sys->statistics.mean_waiting_time[1]+sys->statistics.semi_interval_waiting_time[1]);
 }
 
 void initialize(System *sys_point)
