@@ -94,7 +94,7 @@ void print_fel_h(Node *fel)
         i = j;  // for each row, print from where left off
 
         for (node = fel; node && (i < lim); node = node->next)  // Scan through nodes in FEL in batches of MAX_EV_COL
-            fprintf(stderr, "----EVENT #%d----\t", i++);  // Prints event number and increments it
+            fprintf(stderr, "---- EVENT #%d ----\t", i++);  // Prints event number and increments it
         fprintf(stderr, "\n");
         i = j;
         for (node = fel; node && (i < lim); node = node->next){
@@ -148,8 +148,10 @@ void print_all_stations_h(Station *stations)
     for (j = 0; j < N_STATIONS; j+=MAX_STAT_COL)
     {
         lim = ((j + MAX_STAT_COL)>N_STATIONS)? N_STATIONS : (j + MAX_STAT_COL);
+        i = j;
         for (i = j; i < lim; i++)
-            fprintf(stderr, "------- Station %d-------\t", i);
+            fprintf(stderr, "------- Station %d -------\t", i);
+
         fprintf(stderr, "\n");
         for (i = j; i < lim; i++)
             fprintf(stderr, "in service:\t%d\t\t", stations[i].jobs_in_service);
@@ -175,6 +177,7 @@ void system_recap(System sys)
     fprintf(stderr, "\n\n");
     fprintf(stderr, "============================================================================\n");
     fprintf(stderr, "========================= Clock = %16.5Lf =========================\n", clock);
+    fprintf(stderr, "========================= Event_N %16d =========================\n", sys.event_counter);
     fprintf(stderr, "============================================================================\n");
     fprintf(stderr, "\n");
     print_all_stations_h(sys.stations);

@@ -19,7 +19,7 @@ void simulate(System *sys)
     /* Initialize system */
     initialize(sys);
 
-    for (i = 0; i < 30; i++)
+    for (i = 0; i < reg_cycle_n; i++)
     {
         if (i>0){
             //End_time = clock + END_TIME;
@@ -28,11 +28,12 @@ void simulate(System *sys)
             oldclock = clock;
             reset_stations_measurements(sys->stations);
         }
+
         /* Print report (if DEBUG is ON) and THEN run */
         do {
             #ifdef DEBUG  // Print DEBUG
             system_recap(*sys);
-            getchar();
+            //getchar();
             #endif
         } while (!engine(sys));
 
@@ -78,9 +79,13 @@ void initialize_stations(Station **pointer_to_stations)
 
     stat[0].type = 'D';
     stat[0].distribution = 'e';
-    stat[0].parameter = 300.0;
+    stat[0].parameter = 60.0;
     stat[0].prob_to_stations[0] = 0.0;
     stat[0].prob_to_stations[1] = 1.0;
+    stat[0].prob_to_stations[2] = 0.0;
+    stat[0].prob_to_stations[3] = 0.0;
+    stat[0].prob_to_stations[4] = 0.0;
+    stat[0].prob_to_stations[5] = 0.0;
     stat[0].queue.head = NULL;
     stat[0].queue.tail = NULL;
     stat[0].jobs_in_service = 0;
@@ -89,7 +94,6 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_prob = 0.0;  // Does not apply
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
-
     stat[0].measures.arrivals_n = 0;
     stat[0].measures.departures_n = 0;
     stat[0].measures.waiting_area = 0.0;
@@ -97,21 +101,108 @@ void initialize_stations(Station **pointer_to_stations)
 
     stat[1].type = 'S';
     stat[1].distribution = 'e';
-    stat[1].parameter = 40.0;
-    stat[1].prob_to_stations[0] = 1.0;
-    stat[1].prob_to_stations[1] = 0.0;
+    stat[1].parameter = 10.0;
+    stat[1].prob_to_stations[0] = 0.0;
+    stat[1].prob_to_stations[1] = 0.9;
+    stat[1].prob_to_stations[2] = 0.1;
+    stat[1].prob_to_stations[3] = 0.0;
+    stat[1].prob_to_stations[4] = 0.0;
+    stat[1].prob_to_stations[5] = 0.0;
     stat[1].queue.head = NULL;
     stat[1].queue.tail = NULL;
     stat[1].jobs_in_service = 0;
     stat[1].jobs_in_queue = 0;
     stat[1].server_n = 1;
     stat[1].coffe_prob = 0.0;
-    stat[1].coffe_distribution = 'e';
-    stat[1].coffe_parameter = 10;
-
+    stat[1].coffe_distribution = '\0';
+    stat[1].coffe_parameter = 0.0;
     stat[1].measures.arrivals_n = 0;
     stat[1].measures.departures_n = 0;
     stat[1].measures.waiting_area = 0.0;
+
+    stat[2].type = 'S';
+    stat[2].distribution = 'e';
+    stat[2].parameter = 80.0;
+    stat[2].prob_to_stations[0] = 0.0;
+    stat[2].prob_to_stations[1] = 0.0;
+    stat[2].prob_to_stations[2] = 0.0;
+    stat[2].prob_to_stations[3] = 0.2;
+    stat[2].prob_to_stations[4] = 0.8;
+    stat[2].prob_to_stations[5] = 0.0;
+    stat[2].queue.head = NULL;
+    stat[2].queue.tail = NULL;
+    stat[2].jobs_in_service = 0;
+    stat[2].jobs_in_queue = 0;
+    stat[2].server_n = 1;
+    stat[2].coffe_prob = 0.0;
+    stat[2].coffe_distribution = '\0';
+    stat[2].coffe_parameter = 0.0;
+    stat[2].measures.arrivals_n = 0;
+    stat[2].measures.departures_n = 0;
+    stat[2].measures.waiting_area = 0.0;
+
+    stat[3].type = 'S';
+    stat[3].distribution = 'e';
+    stat[3].parameter = 100.0;
+    stat[3].prob_to_stations[0] = 0.0;
+    stat[3].prob_to_stations[1] = 1.0;
+    stat[3].prob_to_stations[2] = 0.0;
+    stat[3].prob_to_stations[3] = 0.0;
+    stat[3].prob_to_stations[4] = 0.0;
+    stat[3].prob_to_stations[5] = 0.0;
+    stat[3].queue.head = NULL;
+    stat[3].queue.tail = NULL;
+    stat[3].jobs_in_service = 0;
+    stat[3].jobs_in_queue = 0;
+    stat[3].server_n = 1;
+    stat[3].coffe_prob = 0.0;
+    stat[3].coffe_distribution = '\0';
+    stat[3].coffe_parameter = 0.0;
+    stat[3].measures.arrivals_n = 0;
+    stat[3].measures.departures_n = 0;
+    stat[3].measures.waiting_area = 0.0;
+
+    stat[4].type = 'D';
+    stat[4].distribution = 'e';
+    stat[4].parameter = 50.0;
+    stat[4].prob_to_stations[0] = 0.6;
+    stat[4].prob_to_stations[1] = 0.0;
+    stat[4].prob_to_stations[2] = 0.0;
+    stat[4].prob_to_stations[3] = 0.0;
+    stat[4].prob_to_stations[4] = 0.0;
+    stat[4].prob_to_stations[5] = 0.4;
+    stat[4].queue.head = NULL;
+    stat[4].queue.tail = NULL;
+    stat[4].jobs_in_service = 0;
+    stat[4].jobs_in_queue = 0;
+    stat[4].server_n = 0;  // Does not apply
+    stat[4].coffe_prob = 0.0;  // Does not apply
+    stat[4].coffe_distribution = '\0';  // Does not apply
+    stat[4].coffe_parameter = 0.0;  // Does not apply
+    stat[4].measures.arrivals_n = 0;
+    stat[4].measures.departures_n = 0;
+    stat[4].measures.waiting_area = 0.0;
+
+    stat[5].type = 'S';
+    stat[5].distribution = 'e';
+    stat[5].parameter = 90.0;
+    stat[5].prob_to_stations[0] = 1.0;
+    stat[5].prob_to_stations[1] = 0.0;
+    stat[5].prob_to_stations[2] = 0.0;
+    stat[5].prob_to_stations[3] = 0.0;
+    stat[5].prob_to_stations[4] = 0.0;
+    stat[5].prob_to_stations[5] = 0.0;
+    stat[5].queue.head = NULL;
+    stat[5].queue.tail = NULL;
+    stat[5].jobs_in_service = 0;
+    stat[5].jobs_in_queue = 0;
+    stat[5].server_n = 1;
+    stat[5].coffe_prob = 0.0;
+    stat[5].coffe_distribution = '\0';
+    stat[5].coffe_parameter = 0.0;
+    stat[5].measures.arrivals_n = 0;
+    stat[5].measures.departures_n = 0;
+    stat[5].measures.waiting_area = 0.0;
 }
 
 void reset_stations_measurements(Station *stations)
@@ -130,7 +221,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
 {
     int i;
     Node *new_notice;
-    // Schedule 10 arrivals at the delay station
+    // Schedule 10 arrivals at the Load station (0)
     for (i = 0; i < 10; i++)
     {
         new_notice = get_new_node(available);
@@ -425,8 +516,16 @@ int compare_stations_state(Station *s1, Station *s2)
 void set_renewal_state(System *sys_point)
 {
     copy_stations(sys_point->stations, &(sys_point->initialized_stations));
-    sys_point->initialized_stations[0].jobs_in_service = 10;
+    sys_point->initialized_stations[0].jobs_in_service = 1;
     sys_point->initialized_stations[0].jobs_in_queue = 0;
-    sys_point->initialized_stations[1].jobs_in_service = 0;
-    sys_point->initialized_stations[1].jobs_in_queue = 0;
+    sys_point->initialized_stations[1].jobs_in_service = 1;
+    sys_point->initialized_stations[1].jobs_in_queue = 7;
+    sys_point->initialized_stations[2].jobs_in_service = 1;
+    sys_point->initialized_stations[2].jobs_in_queue = 0;
+    sys_point->initialized_stations[3].jobs_in_service = 0;
+    sys_point->initialized_stations[3].jobs_in_queue = 0;
+    sys_point->initialized_stations[4].jobs_in_service = 0;
+    sys_point->initialized_stations[4].jobs_in_queue = 0;
+    sys_point->initialized_stations[5].jobs_in_service = 0;
+    sys_point->initialized_stations[5].jobs_in_queue = 0;
 }
