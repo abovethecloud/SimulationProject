@@ -324,19 +324,31 @@ void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel
         station_full = 1;
 
     node_event->event.arrival_time = clock;
+
+    /* Process arrival at non-full server */
     if (!station_full)
     {
-        /* Process arrival at non-full server */
         stations[station_index].jobs_in_service++;  // Add a job in service
 
         /* Change into a departure from same station after service time */
         node_event->event.type = DEPARTURE;
-        node_event->event.occur_time = clock + station_random_time(stations, station_index);
+
+        /* If a service time has not still be assigned to the job, it gets assigned based on the properties of the station,
+         * otherwise keep going from the previous service time */
+        if (node_event->event.service_time == 0.0){
+            node_event->event.service_time = station_random_time(stations, station_index);
+        }
+
+        node_event->event.occur_time = clock + node_event->event.service_time;
+        node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
+
+        /* TODO: NOTE THAT IT MIGHT NOT MAKE SENSE TO INTRODUCE THE MODIFICATIONS NECESSARY FOR M1 EVEN FOR
+         * GENERIC STATIONS THAT MIGHT HAVE MORE THAN 1 SERVER */
 
         schedule(node_event, pointer_to_fel);  // Schedule departure
     }
+    /* Process arrival at full server */
     else {
-        /* Process arrival at full server */
         enqueue(node_event, &stations[node_event->event.station]);
         stations[station_index].jobs_in_queue++;
     }
