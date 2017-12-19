@@ -18,6 +18,7 @@
 //#define END_TIME 10000000
 #define N_EVENTS_PER_CYCLE 10000
 #define N_CLIENTS 10
+#define CONSUMPTION_TIME 10.0
 
 #define MIN_REG_N 30
 
@@ -35,7 +36,7 @@
 /*========== DEFINITIONS FOR TYPE OF EVENT ==========*/
 #define ARRIVAL 0
 #define DEPARTURE 1
-#define END 2  // Deprecated - Not in use anymore
+#define SELF_TRANSITION 2  // Deprecated - Not in use anymore
 /*===================================================*/
 
 

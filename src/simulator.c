@@ -7,6 +7,8 @@ Node* available;
 long double clock = 0.0;
 long double oldclock = 0.0;
 long double T = 0.0;
+long double consumption_time = CONSUMPTION_TIME;
+
 int reg_cycle_n = MIN_REG_N;
 
 int reached_end = 0;
@@ -254,8 +256,8 @@ int engine(System *sys)
         case DEPARTURE:
             departure(new_event, stations, pointer_to_fel);
         break;
-        case END:
-            fprintf(stderr, "WHAT? END does not exist anymore.\n");
+        case SELF_TRANSITION:
+            self_transition(new_event, stations, pointer_to_fel);
         break;
     }
 
@@ -283,6 +285,9 @@ void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel)
     {
         case 'S':
             arrival_at_server(node_event, stations, pointer_to_fel);
+        break;
+        case 'M':
+            arrival_at_M1(node_event, stations, pointer_to_fel);
         break;
         case 'D':
             arrival_at_delay(node_event, stations, pointer_to_fel);
@@ -331,9 +336,6 @@ void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel
         node_event->event.occur_time = clock + node_event->event.service_time;
         node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
 
-        /* TODO: NOTE THAT IT MIGHT NOT MAKE SENSE TO INTRODUCE THE MODIFICATIONS NECESSARY FOR M1 EVEN FOR
-         * GENERIC STATIONS THAT MIGHT HAVE MORE THAN 1 SERVER */
-
         schedule(node_event, pointer_to_fel);  // Schedule departure
     }
     /* Process arrival at full server */
@@ -341,6 +343,85 @@ void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel
         enqueue(node_event, &stations[node_event->event.station]);
         stations[station_index].jobs_in_queue++;
     }
+}
+
+void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
+{
+    double served_time = 0.0;
+    int station_index = node_event->event.station;
+    int station_full = 0;
+
+    /* Determine wether station is full */
+    if (stations[station_index].jobs_in_service == stations[station_index].server_n)
+        station_full = 1;
+
+    node_event->event.arrival_time = clock;
+
+    /* Process arrival at non-full server */
+    if (!station_full)
+    {
+        stations[station_index].jobs_in_service++;  // Add a job in service
+
+        /* If a service time has not still be assigned to the job, it gets assigned based on the properties of the station,
+         * otherwise keep going from the previous service time */
+        if (node_event->event.service_time == 0.0){
+            node_event->event.service_time = station_random_time(stations, station_index);
+        }
+
+        if (approx_equal(node_event->event.service_time, consumption_time)) {
+            consumption_time = CONSUMPTION_TIME;  // reset consumption time and schedule departure
+            /* Change into a departure from same station after service time */
+            node_event->event.type = DEPARTURE;
+
+            node_event->event.occur_time = clock + node_event->event.service_time;
+            node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
+
+            schedule(node_event, pointer_to_fel);  // Schedule departure
+        } else if (node_event->event.service_time < consumption_time) {
+            consumption_time -= node_event->event.service_time;  // decrease remaining consumption time and schedule departure
+            node_event->event.type = DEPARTURE;
+
+            node_event->event.occur_time = clock + node_event->event.service_time;
+            node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
+
+            schedule(node_event, pointer_to_fel);  // Schedule departure
+        } else if (node_event->event.service_time > consumption_time) {
+            served_time = consumption_time;
+            node_event->event.service_time -= served_time;  // decrease remaining service time by consumption time, then reset it
+            consumption_time = CONSUMPTION_TIME;  // reset consumption time and reschedule arrival at same station
+
+            node_event->event.type = SELF_TRANSITION;
+            node_event->event.occur_time = clock + served_time;
+        }
+
+    }
+    /* Process arrival at full server */
+    else {
+        enqueue(node_event, &stations[node_event->event.station]);
+        stations[station_index].jobs_in_queue++;
+    }
+}
+
+void self_transition(Node* node_event, Station *stations, Tree *pointer_to_fel)
+{
+    int station_index = node_event->event.station;
+
+    stations[station_index].measures.departures_n++;
+    stations[station_index].jobs_in_service--;
+
+    Node* next_job;
+    if (stations[station_index].queue.tail) {
+        /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
+        next_job = dequeue(&stations[node_event->event.station]);
+        stations[station_index].jobs_in_queue--;
+        arrival_at_M1(next_job, stations, pointer_to_fel);
+    }
+
+    /* Change departing job into arrival at same station at same time*/
+    node_event->event.type = ARRIVAL;
+    node_event->event.station = station_index;
+
+    schedule(node_event, pointer_to_fel);  // Schedule arrival to next station
 }
 
 void departure(Node* node_event, Station *stations, Tree *pointer_to_fel)

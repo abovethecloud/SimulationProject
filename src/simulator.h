@@ -48,6 +48,10 @@ void arrival_at_delay(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
 void arrival_at_server(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
+void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel);
+
+void self_transition(Node* node_event, Station *stations, Tree *pointer_to_fel);
+
 void departure(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
 void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_fel);
