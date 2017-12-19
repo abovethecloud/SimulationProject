@@ -1,7 +1,8 @@
 #include "simulator.h"
 
 
-long double End_time = END_TIME;
+//long double End_time = END_TIME;
+long double N_events_stop = N_EVENTS_PER_CYCLE;
 Node* available;
 long double clock = 0.0;
 long double oldclock = 0.0;
@@ -21,7 +22,8 @@ void simulate(System *sys)
     for (i = 0; i < 30; i++)
     {
         if (i>0){
-            End_time = clock + END_TIME;
+            //End_time = clock + END_TIME;
+            N_events_stop = sys->event_counter + N_EVENTS_PER_CYCLE;
             reached_end = 0;
             oldclock = clock;
             reset_stations_measurements(sys->stations);
@@ -157,7 +159,8 @@ int engine(System *sys)
     /* update clock and check if reached End_time */
     long double oldtime = clock;
     long double delta = update_clock(new_event, oldtime);
-    if (clock >= End_time)
+    //if (clock >= End_time)
+    if (sys->event_counter >= N_events_stop)
         reached_end = 1;
 
     update_stations_measurements(sys, delta);

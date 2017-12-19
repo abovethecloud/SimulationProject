@@ -15,7 +15,8 @@
 /*==================== EDIT THOSE VALUES ACCORDINGLY ====================*/
 // Remember to update the following values as stations and clients are added!!!
 #define N_STATIONS 2
-#define END_TIME 10000000
+//#define END_TIME 10000000
+#define N_EVENTS_PER_CYCLE 1000000
 #define N_CLIENTS 10
 
 #define MIN_REG_N 30
