@@ -230,6 +230,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
         new_notice->event.station = 0;  // First arrival to station 0
         new_notice->event.create_time = clock;
         new_notice->event.occur_time = 0.0;
+        new_notice->event.service_time = 0.0;
         new_notice->next = NULL;
         new_notice->previous = NULL;
         schedule(new_notice, pointer_to_fel);
