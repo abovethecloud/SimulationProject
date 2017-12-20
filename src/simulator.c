@@ -392,6 +392,7 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
             node_event->event.type = SELF_TRANSITION;
             node_event->event.occur_time = clock + served_time;
+            schedule(node_event, pointer_to_fel);  // Schedule Self transition
         }
 
     }
@@ -414,7 +415,7 @@ void self_transition(Node* node_event, Station *stations, Tree *pointer_to_fel)
         /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
         next_job = dequeue(&stations[node_event->event.station]);
         stations[station_index].jobs_in_queue--;
-        arrival_at_M1(next_job, stations, pointer_to_fel);
+        arrival(next_job, stations, pointer_to_fel);
     }
 
     /* Change departing job into arrival at same station at same time*/
