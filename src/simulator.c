@@ -21,7 +21,7 @@ void simulate(System *sys)
     /* Initialize system */
     initialize(sys);
 
-    for (i = 0; i < reg_cycle_n; i++)
+    for (i = 0; i < reg_cycle_n+1; i++)
     {
         if (i>0){
             //End_time = clock + END_TIME;
@@ -41,17 +41,19 @@ void simulate(System *sys)
         } while (!engine(sys));
 
         // Update Measurements every Regeneration Cycle
-        T = clock - oldclock;
-        update_mean_measures(&means, sys->stations, i);
-        fprintf(stderr, "waiting area = %40.20Lf\n", means.squared_sum_waiting_area[1]);
+        if (i > 0) {
+            T = clock - oldclock;
+            update_mean_measures(&means, sys->stations, i);
+            fprintf(stderr, "waiting area = %40.20Lf\n", means.squared_sum_waiting_area[1]);
 
-        /* Final prints */
-        system_recap(*sys);
+            /* Final prints */
+            system_recap(*sys);
 
-        fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
-        fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
-        fprintf(stderr, "Final clock: %Lf\n", clock);
-        fprintf(stderr, "Throughput of station 1: %Lf\n", sys->stations[1].measures.departures_n/T);
+            fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
+            fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
+            fprintf(stderr, "Final clock: %Lf\n", clock);
+            fprintf(stderr, "Throughput of station 1: %Lf\n", sys->stations[1].measures.departures_n/T);
+        }
     }
     compute_statistics(sys, means);
     fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
@@ -213,13 +215,25 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
 {
     int i;
     Node *new_notice;
-    // Schedule 10 arrivals at the Load station (0)
-    for (i = 0; i < N_CLIENTS; i++)
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 0);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 0;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    // Schedule 8 arrivals at M1 station
+    for (i = 1; i < 9; i++)
     {
         new_notice = get_new_node(available);
         sprintf(new_notice->event.name, "J%d", i);
         new_notice->event.type = ARRIVAL;
-        new_notice->event.station = 0;  // First arrival to station 0
+        new_notice->event.station = 1;  // First arrival to station 0
         new_notice->event.create_time = clock;
         new_notice->event.occur_time = 0.0;
         new_notice->event.service_time = 0.0;
@@ -227,6 +241,17 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
         new_notice->previous = NULL;
         schedule(new_notice, pointer_to_fel);
     }
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 9);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 2;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
 }
 
 int engine(System *sys)
@@ -426,13 +451,15 @@ void self_transition(Node* node_event, Station *stations, Tree *pointer_to_fel)
 {
     int station_index = node_event->event.station;
 
-    stations[station_index].measures.departures_n++;
+    // stations[station_index].measures.departures_n++;
     stations[station_index].jobs_in_service--;
 
-    stations[station_index].measures.arrivals_n--;  // since a fake arrival is rescheduled in the same station
+    stations[station_index].measures.arrivals_n--;  // PREVENTIVE: since a fake arrival is rescheduled in the same station
 
     Node* next_job;
     if (stations[station_index].queue.tail) {
+        stations[station_index].measures.arrivals_n--;  // since an "arrival" is handled from the queue
+
         /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
         next_job = dequeue(&stations[node_event->event.station]);
         stations[station_index].jobs_in_queue--;
@@ -532,6 +559,7 @@ void departure_from_M1(Node* node_event, Station *stations, Tree *pointer_to_fel
         /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
         next_job = dequeue(&stations[node_event->event.station]);
         stations[station_index].jobs_in_queue--;
+         stations[station_index].measures.arrivals_n--;
         arrival(next_job, stations, pointer_to_fel);
     }
 

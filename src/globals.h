@@ -16,7 +16,7 @@
 // Remember to update the following values as stations and clients are added!!!
 #define N_STATIONS 6
 //#define END_TIME 10000000
-#define N_EVENTS_PER_CYCLE 10000
+#define N_EVENTS_PER_CYCLE 100
 #define N_CLIENTS 10
 #define CONSUMPTION_TIME 10.0
 
@@ -27,7 +27,7 @@
 #define MAX_EV_COL 10  // Max number of events per row
 
 // Comment or uncomment the following line to (de)activate general step-by-step prints throughout the simulator
-//#define DEBUG
+#define DEBUG
 // Comment or uncomment the following line to (de)activate debug for current bugs
 //#define CURR_DEBUG
 /*=======================================================================*/
