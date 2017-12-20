@@ -58,6 +58,8 @@ void departure_from_delay(Node* node_event, Station *stations, Tree *pointer_to_
 
 void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to_fel);
 
+void departure_from_M1(Node* node_event, Station *stations, Tree *pointer_to_fel);
+
 long double update_clock(Node* new_event, long double oldtime);
 
 /*

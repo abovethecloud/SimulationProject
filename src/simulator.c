@@ -35,6 +35,7 @@ void simulate(System *sys)
         do {
             #ifdef DEBUG  // Print DEBUG
             system_recap(*sys);
+            fprintf(stderr, "CONSUMPTION TIME: %Lf\n", consumption_time);
             getchar();
             #endif
         } while (!engine(sys));
@@ -213,7 +214,7 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     int i;
     Node *new_notice;
     // Schedule 10 arrivals at the Load station (0)
-    for (i = 0; i < 10; i++)
+    for (i = 0; i < N_CLIENTS; i++)
     {
         new_notice = get_new_node(available);
         sprintf(new_notice->event.name, "J%d", i);
@@ -251,12 +252,21 @@ int engine(System *sys)
     switch(new_event->event.type)
     {
         case ARRIVAL:
+            #ifdef DEBUG
+                fprintf(stderr, "Handled ARRIVAL at station %d\n", new_event->event.station);
+            #endif
             arrival(new_event, stations, pointer_to_fel);
         break;
         case DEPARTURE:
+            #ifdef DEBUG
+                fprintf(stderr, "Handled DEPARTURE at station %d\n", new_event->event.station);
+            #endif
             departure(new_event, stations, pointer_to_fel);
         break;
         case SELF_TRANSITION:
+            #ifdef DEBUG
+                fprintf(stderr, "Handled SELF_TRANSITION at station %d\n", new_event->event.station);
+            #endif
             self_transition(new_event, stations, pointer_to_fel);
         break;
     }
@@ -303,7 +313,13 @@ void arrival_at_delay(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
     /* Change into a departure from same station without queuing */
     node_event->event.type = DEPARTURE;
-    node_event->event.occur_time = clock + station_random_time(stations, station_index);
+
+    if (node_event->event.service_time == 0.0){
+            node_event->event.service_time = station_random_time(stations, station_index);
+    }
+
+    node_event->event.occur_time = clock + node_event->event.service_time;
+    node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
 
     schedule(node_event, pointer_to_fel);  // Schedule the departure
 }
@@ -364,7 +380,7 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
         /* If a service time has not still be assigned to the job, it gets assigned based on the properties of the station,
          * otherwise keep going from the previous service time */
-        if (node_event->event.service_time == 0.0){
+        if (approx_equal(node_event->event.service_time, 0.0)){
             node_event->event.service_time = station_random_time(stations, station_index);
         }
 
@@ -377,6 +393,7 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
             node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
 
             schedule(node_event, pointer_to_fel);  // Schedule departure
+
         } else if (node_event->event.service_time < consumption_time) {
             consumption_time -= node_event->event.service_time;  // decrease remaining consumption time and schedule departure
             node_event->event.type = DEPARTURE;
@@ -385,6 +402,7 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
             node_event->event.service_time = 0.0;  // If the event gets completed, reset its service time
 
             schedule(node_event, pointer_to_fel);  // Schedule departure
+
         } else if (node_event->event.service_time > consumption_time) {
             served_time = consumption_time;
             node_event->event.service_time -= served_time;  // decrease remaining service time by consumption time, then reset it
@@ -393,6 +411,7 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
             node_event->event.type = SELF_TRANSITION;
             node_event->event.occur_time = clock + served_time;
             schedule(node_event, pointer_to_fel);  // Schedule Self transition
+
         }
 
     }
@@ -434,9 +453,11 @@ void departure(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
     switch (station_type)
     {
-        case 'M':  // the same in M1 as in Server
         case 'S':
             departure_from_server(node_event, stations, pointer_to_fel);
+        break;
+        case 'M':
+            departure_from_M1(node_event, stations, pointer_to_fel);
         break;
         case 'D':
             departure_from_delay(node_event, stations, pointer_to_fel);
@@ -480,8 +501,36 @@ void departure_from_server(Node* node_event, Station *stations, Tree *pointer_to
 
         /* Schedule a departure from same station after service time and maybe coffe break */
         next_job->event.type = DEPARTURE;
-        next_job->event.occur_time = clock + coffe_length + station_random_time(stations, station_index);
+        if (approx_equal(next_job->event.service_time, 0.0)){
+            next_job->event.service_time = station_random_time(stations, station_index);
+        }
+
+        next_job->event.occur_time = clock + coffe_length + next_job->event.service_time;
+        next_job->event.service_time = 0.0;  // If the event gets completed, reset its service time
+
         schedule(next_job, pointer_to_fel);
+    }
+
+    /* Change into arrival at next station */
+    node_event->event.type = ARRIVAL;
+    node_event->event.station = next_station(stations, station_index);
+
+    schedule(node_event, pointer_to_fel);  // Schedule arrival to next station
+}
+
+void departure_from_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
+{
+    int station_index = node_event->event.station;
+
+    stations[station_index].jobs_in_service--;  // Decrease the number of jobs in service for the station
+
+    /* If there is something in queue for the station, schedule the arrival at same station */
+    Node* next_job;
+    if (stations[station_index].queue.tail) {
+        /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
+        next_job = dequeue(&stations[node_event->event.station]);
+        stations[station_index].jobs_in_queue--;
+        arrival(next_job, stations, pointer_to_fel);
     }
 
     /* Change into arrival at next station */

@@ -29,7 +29,7 @@
 // Comment or uncomment the following line to (de)activate general step-by-step prints throughout the simulator
 //#define DEBUG
 // Comment or uncomment the following line to (de)activate debug for current bugs
-#define CURR_DEBUG
+//#define CURR_DEBUG
 /*=======================================================================*/
 
 
