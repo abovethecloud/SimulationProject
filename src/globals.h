@@ -103,6 +103,7 @@ typedef struct run_means
     long double mean_waiting_area[N_STATIONS];
 
     long double sum_of_product_waiting_and_arrivals[N_STATIONS];
+    long double sum_of_product_waiting_and_departures[N_STATIONS];
 } Means;
 
 typedef struct station
