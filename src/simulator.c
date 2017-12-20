@@ -35,7 +35,7 @@ void simulate(System *sys)
         do {
             #ifdef DEBUG  // Print DEBUG
             system_recap(*sys);
-            //getchar();
+            getchar();
             #endif
         } while (!engine(sys));
 
@@ -98,13 +98,13 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
 
-    stat[1].type = 'S';
-    stat[1].distribution = 'e';
-    stat[1].parameters[0] = 10.0;
-    stat[1].parameters[1] = 0.0;
+    stat[1].type = 'M';
+    stat[1].distribution = 'E';
+    stat[1].parameters[0] = 50.0;
+    stat[1].parameters[1] = 250.0;
     stat[1].prob_to_stations[0] = 0.0;
-    stat[1].prob_to_stations[1] = 0.9;
-    stat[1].prob_to_stations[2] = 0.1;
+    stat[1].prob_to_stations[1] = 0.0;
+    stat[1].prob_to_stations[2] = 1.0;
     stat[1].prob_to_stations[3] = 0.0;
     stat[1].prob_to_stations[4] = 0.0;
     stat[1].prob_to_stations[5] = 0.0;
@@ -434,6 +434,7 @@ void departure(Node* node_event, Station *stations, Tree *pointer_to_fel)
 
     switch (station_type)
     {
+        case 'M':  // the same in M1 as in Server
         case 'S':
             departure_from_server(node_event, stations, pointer_to_fel);
         break;

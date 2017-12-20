@@ -80,7 +80,7 @@ void print_fel_h(Node *fel)
         return;
     }
 
-    char *type[3] = {"ARR", "DEP", "END"};  // To print the type from the numerical value
+    char *type[3] = {"ARR", "DEP", "SELF"};  // To print the type from the numerical value
 
     Node *node;  // Pointer to node which will scan through the nodes in the FEL
     int  i, j, lim;     /* j: goes from 0 to the number of clients
