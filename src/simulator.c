@@ -41,7 +41,7 @@ void simulate(System *sys)
         } while (!engine(sys));
 
         // Update Measurements every Regeneration Cycle
-        if (i > 0) {
+        if (i > 0) {  // Change to ">" to avoid taking into account the first cycle
             T = clock - oldclock;
             update_mean_measures(&means, sys->stations, i);
             fprintf(stderr, "waiting area = %40.20Lf\n", means.squared_sum_waiting_area[1]);
@@ -213,7 +213,6 @@ void reset_stations_measurements(Station *stations)
 
 void starting_events(Tree *pointer_to_fel, Station *stations)
 {
-    int i;
     Node *new_notice;
 
     new_notice = get_new_node(available);
@@ -227,25 +226,98 @@ void starting_events(Tree *pointer_to_fel, Station *stations)
     new_notice->previous = NULL;
     schedule(new_notice, pointer_to_fel);
 
-    // Schedule 8 arrivals at M1 station
-    for (i = 1; i < 9; i++)
-    {
-        new_notice = get_new_node(available);
-        sprintf(new_notice->event.name, "J%d", i);
-        new_notice->event.type = ARRIVAL;
-        new_notice->event.station = 1;  // First arrival to station 0
-        new_notice->event.create_time = clock;
-        new_notice->event.occur_time = 0.0;
-        new_notice->event.service_time = 0.0;
-        new_notice->next = NULL;
-        new_notice->previous = NULL;
-        schedule(new_notice, pointer_to_fel);
-    }
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 1);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 0;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 2);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 2;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 3);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 2;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 4);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 2;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 5);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 3;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 6);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 3;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 7);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 4;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
+
+    new_notice = get_new_node(available);
+    sprintf(new_notice->event.name, "J%d", 8);
+    new_notice->event.type = ARRIVAL;
+    new_notice->event.station = 4;  // First arrival to station 0
+    new_notice->event.create_time = clock;
+    new_notice->event.occur_time = 0.0;
+    new_notice->event.service_time = 0.0;
+    new_notice->next = NULL;
+    new_notice->previous = NULL;
+    schedule(new_notice, pointer_to_fel);
 
     new_notice = get_new_node(available);
     sprintf(new_notice->event.name, "J%d", 9);
     new_notice->event.type = ARRIVAL;
-    new_notice->event.station = 2;  // First arrival to station 0
+    new_notice->event.station = 5;  // First arrival to station 0
     new_notice->event.create_time = clock;
     new_notice->event.occur_time = 0.0;
     new_notice->event.service_time = 0.0;
@@ -261,6 +333,7 @@ int engine(System *sys)
 
     /* Initializations */
     int halt = 0;
+    //int event_in_M1 = 0;
 
     /* Get next event from FEL */
     Node* new_event = event_pop(pointer_to_fel);
@@ -271,6 +344,8 @@ int engine(System *sys)
     //if (clock >= End_time)
     if (sys->event_counter >= N_events_stop)
         reached_end = 1;
+    //if ((new_event->event.station == 1) && (new_event->event.type == ARRIVAL))
+    //    event_in_M1 = 1;
 
     update_stations_measurements(sys, delta);
 
@@ -688,16 +763,16 @@ int compare_stations_state(Station *s1, Station *s2)
 void set_renewal_state(System *sys_point)
 {
     copy_stations(sys_point->stations, &(sys_point->initialized_stations));
-    sys_point->initialized_stations[0].jobs_in_service = 1;
+    sys_point->initialized_stations[0].jobs_in_service = 2;
     sys_point->initialized_stations[0].jobs_in_queue = 0;
-    sys_point->initialized_stations[1].jobs_in_service = 1;
-    sys_point->initialized_stations[1].jobs_in_queue = 7;
+    sys_point->initialized_stations[1].jobs_in_service = 0;
+    sys_point->initialized_stations[1].jobs_in_queue = 0;
     sys_point->initialized_stations[2].jobs_in_service = 1;
-    sys_point->initialized_stations[2].jobs_in_queue = 0;
-    sys_point->initialized_stations[3].jobs_in_service = 0;
-    sys_point->initialized_stations[3].jobs_in_queue = 0;
-    sys_point->initialized_stations[4].jobs_in_service = 0;
+    sys_point->initialized_stations[2].jobs_in_queue = 2;
+    sys_point->initialized_stations[3].jobs_in_service = 1;
+    sys_point->initialized_stations[3].jobs_in_queue = 1;
+    sys_point->initialized_stations[4].jobs_in_service = 2;
     sys_point->initialized_stations[4].jobs_in_queue = 0;
-    sys_point->initialized_stations[5].jobs_in_service = 0;
+    sys_point->initialized_stations[5].jobs_in_service = 1;
     sys_point->initialized_stations[5].jobs_in_queue = 0;
 }
