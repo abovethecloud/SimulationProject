@@ -429,6 +429,8 @@ void self_transition(Node* node_event, Station *stations, Tree *pointer_to_fel)
     stations[station_index].measures.departures_n++;
     stations[station_index].jobs_in_service--;
 
+    stations[station_index].measures.arrivals_n--;  // since a fake arrival is rescheduled in the same station
+
     Node* next_job;
     if (stations[station_index].queue.tail) {
         /* Process departure from a server with a queue by dequeuing and immedeatly scheduling another departure from the same server */
