@@ -8,6 +8,8 @@ long double clock = 0.0;
 long double oldclock = 0.0;
 long double T = 0.0;
 long double consumption_time = CONSUMPTION_TIME;
+CycleMeasures cyclemeasures = {0};
+
 
 int reg_cycle_n = MIN_REG_N;
 
@@ -56,12 +58,15 @@ void simulate(System *sys)
         }
     }
     compute_statistics(sys, means);
-    fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
-    fprintf(stderr, "Mean number of Jobs at station 1: %Lf\n", sys->statistics.mean_number_jobs[1]);
-    fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
-    fprintf(stderr, "Mean waiting: %Lf\n", sys->statistics.mean_waiting_time[1]);
-    fprintf(stderr, "Waiting semi_interval: %Lf\n", sys->statistics.semi_interval_waiting_time[1]);
-    fprintf(stderr, "CONFIDENCE INTERVAL: [%13.10Lf, %13.10Lf]\n", sys->statistics.mean_waiting_time[1]-sys->statistics.semi_interval_waiting_time[1], sys->statistics.mean_waiting_time[1]+sys->statistics.semi_interval_waiting_time[1]);
+    //fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
+    //fprintf(stderr, "Mean number of Jobs at station 1: %Lf\n", sys->statistics.mean_number_jobs[1]);
+    //fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
+    //fprintf(stderr, "Mean waiting: %Lf\n", sys->statistics.mean_waiting_time[1]);
+    //fprintf(stderr, "Waiting semi_interval: %Lf\n", sys->statistics.semi_interval_waiting_time[1]);
+    //fprintf(stderr, "CONFIDENCE INTERVAL: [%13.10Lf, %13.10Lf]\n", sys->statistics.mean_waiting_time[1]-sys->statistics.semi_interval_waiting_time[1], sys->statistics.mean_waiting_time[1]+sys->statistics.semi_interval_waiting_time[1]);
+    fprintf(stderr, "Mean cycle time: %Lf\n", sys->statistics.mean_cycle_time);
+    fprintf(stderr, "Cycle time semi-interval: %Lf\n", sys->statistics.semi_interval_cycle_time);
+    fprintf(stderr, "CONFIDENCE INTERVAL: [%Lf, %Lf]\n", sys->statistics.mean_cycle_time - sys->statistics.semi_interval_cycle_time, sys->statistics.mean_cycle_time + sys->statistics.semi_interval_cycle_time);
 }
 
 void initialize(System *sys_point)
@@ -333,7 +338,7 @@ int engine(System *sys)
 
     /* Initializations */
     int halt = 0;
-    //int event_in_M1 = 0;
+    int event_in_0 = 0;
 
     /* Get next event from FEL */
     Node* new_event = event_pop(pointer_to_fel);
@@ -344,8 +349,8 @@ int engine(System *sys)
     //if (clock >= End_time)
     if (sys->event_counter >= N_events_stop)
         reached_end = 1;
-    //if ((new_event->event.station == 1) && (new_event->event.type == ARRIVAL))
-    //    event_in_M1 = 1;
+    if ((new_event->event.station == 0) && (new_event->event.type == ARRIVAL))
+        event_in_0 = 1;
 
     update_stations_measurements(sys, delta);
 
@@ -375,7 +380,7 @@ int engine(System *sys)
 
     if (reached_end)
     {
-        if (compare_stations_state(sys->stations, sys->initialized_stations))
+        if ((compare_stations_state(sys->stations, sys->initialized_stations)) && (event_in_0 == 1))
         {
             halt = 1;
         }
@@ -390,6 +395,20 @@ void arrival(Node* node_event, Station *stations, Tree *pointer_to_fel)
     char station_type = stations[station_index].type;
 
     stations[station_index].measures.arrivals_n++;
+
+    // If arrival at UNLOAD, record it
+    if (station_index == 4) {
+        if (node_event->event.arrivals_at_Unload == 0)
+            node_event->event.first_arrival_at_Unload = clock;
+
+        node_event->event.last_arrival_at_Unload = clock;
+        node_event->event.arrivals_at_Unload++;
+
+        if ((node_event->event.arrivals_at_Unload > node_event->event.departures_from_Load) && (node_event->event.departures_from_Load > 0)){
+            cyclemeasures.sum_manufacturing_n++;
+            cyclemeasures.sum_manufacturing_time += (node_event->event.last_arrival_at_Unload - node_event->event.last_departure_from_Load);
+        }
+    }
 
     switch (station_type)
     {
@@ -495,7 +514,8 @@ void arrival_at_M1(Node* node_event, Station *stations, Tree *pointer_to_fel)
             schedule(node_event, pointer_to_fel);  // Schedule departure
 
         } else if (node_event->event.service_time < consumption_time) {
-            consumption_time -= node_event->event.service_time;  // decrease remaining consumption time and schedule departure
+            //consumption_time -= node_event->event.service_time;  // decrease remaining consumption time and schedule departure
+            consumption_time = CONSUMPTION_TIME;  // reset consumption time and schedule departure BECAUSE NO MEMORY
             node_event->event.type = DEPARTURE;
 
             node_event->event.occur_time = clock + node_event->event.service_time;
@@ -552,8 +572,25 @@ void departure(Node* node_event, Station *stations, Tree *pointer_to_fel)
 {
     int station_index = node_event->event.station;
     char station_type = stations[station_index].type;
+    long double lastt = 0.0;
 
     stations[station_index].measures.departures_n++;
+
+    // If departure from LOAD, update event notice with time stamps
+    if (station_index == 0) {
+        if (node_event->event.departures_from_Load == 0)  // Only the first time set first arrival
+            node_event->event.first_departure_from_Load = clock;
+
+        lastt = node_event->event.last_departure_from_Load;
+
+        node_event->event.last_departure_from_Load = clock;
+        node_event->event.departures_from_Load++;
+
+        if (node_event->event.departures_from_Load > 1){
+            cyclemeasures.sum_cycle_n++;
+            cyclemeasures.sum_cycle_time += (node_event->event.last_departure_from_Load - lastt);
+        }
+    }
 
     switch (station_type)
     {
