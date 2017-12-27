@@ -28,6 +28,11 @@ void compute_statistics(System *sys, Means means)
 
 
     sys->statistics.mean_manufacturing_time = cyclemeasures.sum_manufacturing_time/cyclemeasures.sum_manufacturing_n;
+    sys->statistics.del_manufacturing_time =
+        sqrtl((long double) reg_cycle_n/(reg_cycle_n - 1)) *
+        sqrtl(cyclemeasures.squared_sum_manufacturing_time - 2*(sys->statistics.mean_manufacturing_time)*(cyclemeasures.sum_product_manufacturingtime_manufacturingn) + powl(sys->statistics.mean_manufacturing_time, 2.0)*cyclemeasures.squared_sum_manufacturing_n) /
+        (long double) cyclemeasures.sum_manufacturing_n;
+        sys->statistics.semi_interval_manufacturing_time = t_st * sys->statistics.del_manufacturing_time;
 }
 
 void update_stations_measurements(System *sys, long double delta)

@@ -66,7 +66,11 @@ void simulate(System *sys)
     //fprintf(stderr, "CONFIDENCE INTERVAL: [%13.10Lf, %13.10Lf]\n", sys->statistics.mean_waiting_time[1]-sys->statistics.semi_interval_waiting_time[1], sys->statistics.mean_waiting_time[1]+sys->statistics.semi_interval_waiting_time[1]);
     fprintf(stderr, "Mean cycle time: %Lf\n", sys->statistics.mean_cycle_time);
     fprintf(stderr, "Cycle time semi-interval: %Lf\n", sys->statistics.semi_interval_cycle_time);
-    fprintf(stderr, "CONFIDENCE INTERVAL: [%Lf, %Lf]\n", sys->statistics.mean_cycle_time - sys->statistics.semi_interval_cycle_time, sys->statistics.mean_cycle_time + sys->statistics.semi_interval_cycle_time);
+    fprintf(stderr, "CONFIDENCE INTERVAL for CYCLE TIME: [%Lf, %Lf]\n", sys->statistics.mean_cycle_time - sys->statistics.semi_interval_cycle_time, sys->statistics.mean_cycle_time + sys->statistics.semi_interval_cycle_time);
+
+    fprintf(stderr, "Mean manufacturing time: %Lf\n", sys->statistics.mean_manufacturing_time);
+    fprintf(stderr, "Manufacturing time semi-interval: %Lf\n", sys->statistics.semi_interval_manufacturing_time);
+    fprintf(stderr, "CONFIDENCE INTERVAL for MANUFACTURING TIME: [%Lf, %Lf]\n", sys->statistics.mean_manufacturing_time - sys->statistics.semi_interval_manufacturing_time, sys->statistics.mean_manufacturing_time + sys->statistics.semi_interval_manufacturing_time);
 }
 
 void initialize(System *sys_point)
