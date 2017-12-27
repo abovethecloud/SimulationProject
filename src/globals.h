@@ -78,6 +78,10 @@ typedef struct statistic_measures
 {
     long double mean_number_jobs[N_STATIONS];
 
+    long double mean_service_time[N_STATIONS];
+    long double del_service_time[N_STATIONS];
+    long double semi_interval_service_time[N_STATIONS];
+
     long double mean_waiting_time[N_STATIONS];
     long double del_waiting_time[N_STATIONS];
     long double semi_interval_waiting_time[N_STATIONS];
@@ -98,6 +102,7 @@ typedef struct station_measurements
     int arrivals_n;
     int departures_n;
     long double waiting_area;
+    long double service_area;
 } Measurements;
 
 typedef struct run_means
@@ -120,6 +125,13 @@ typedef struct run_means
 
     long double sum_of_product_waiting_and_arrivals[N_STATIONS];
     long double sum_of_product_waiting_and_departures[N_STATIONS];
+
+    long double sum_service_area[N_STATIONS];
+    long double squared_sum_service_area[N_STATIONS];
+    long double mean_service_area[N_STATIONS];
+
+    long double sum_of_product_service_and_departures[N_STATIONS];
+
 } Means;
 
 typedef struct cycle_measures

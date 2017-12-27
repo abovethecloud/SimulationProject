@@ -71,6 +71,10 @@ void simulate(System *sys)
     fprintf(stderr, "Mean manufacturing time: %Lf\n", sys->statistics.mean_manufacturing_time);
     fprintf(stderr, "Manufacturing time semi-interval: %Lf\n", sys->statistics.semi_interval_manufacturing_time);
     fprintf(stderr, "CONFIDENCE INTERVAL for MANUFACTURING TIME: [%Lf, %Lf]\n", sys->statistics.mean_manufacturing_time - sys->statistics.semi_interval_manufacturing_time, sys->statistics.mean_manufacturing_time + sys->statistics.semi_interval_manufacturing_time);
+
+    int serv_stat = 1;
+    fprintf(stderr, "Mean service time at station %d: %Lf\n", serv_stat, sys->statistics.mean_service_time[serv_stat]);
+    fprintf(stderr, "CONFIDENCE INTERVAL for SERVICE TIME at station %d: [%Lf, %Lf]\n", serv_stat, sys->statistics.mean_service_time[serv_stat] - sys->statistics.semi_interval_service_time[serv_stat], sys->statistics.mean_service_time[serv_stat] + sys->statistics.semi_interval_service_time[serv_stat]);
 }
 
 void initialize(System *sys_point)
@@ -217,6 +221,7 @@ void reset_stations_measurements(Station *stations)
         measures->arrivals_n = 0;
         measures->departures_n = 0;
         measures->waiting_area = 0.0;
+        measures->service_area = 0.0;
     }
 }
 
@@ -357,6 +362,10 @@ int engine(System *sys)
         event_in_0 = 1;
 
     update_stations_measurements(sys, delta);
+    #ifdef DEBUG
+        fprintf(stderr, "service area 1: %Lf\n", sys->stations[1].measures
+            .service_area);
+    #endif
 
     switch(new_event->event.type)
     {

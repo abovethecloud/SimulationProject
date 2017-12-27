@@ -1,6 +1,6 @@
 #include "statistics.h"
 
-long double t_st = 1.699; // for 90%, 2.04522964 for 95%
+long double t_st = 1.699; // for 90%; 2.04522964 for 95%; 0.683 for 50%
 
 void compute_statistics(System *sys, Means means)
 {
@@ -8,17 +8,24 @@ void compute_statistics(System *sys, Means means)
     for (i = 0; i < N_STATIONS; i++){
         sys->statistics.mean_number_jobs[i] = means.sum_waiting_area[i]/means.sum_observation_time;
 
-        sys->statistics.mean_waiting_time[i] = means.sum_waiting_area[i]/((long double) means.sum_departures[i]);
-
         sys->statistics.mean_throughput[i] = ((long double) means.sum_departures[i])/means.sum_observation_time;
 
+        sys->statistics.mean_waiting_time[i] = means.sum_waiting_area[i]/((long double) means.sum_departures[i]);
         sys->statistics.del_waiting_time[i] =
             sqrtl((long double) reg_cycle_n/(reg_cycle_n - 1)) *
             sqrtl(means.squared_sum_waiting_area[i] - 2*(sys->statistics.mean_waiting_time[i])*(means.sum_of_product_waiting_and_departures[i]) + (sys->statistics.mean_waiting_time[i])*(sys->statistics.mean_waiting_time[i])*(means.squared_sum_departures[i])) /
             (long double) means.sum_departures[i];
+        sys->statistics.semi_interval_waiting_time[i] = t_st * sys->statistics.del_waiting_time[i];
 
-        sys->statistics.semi_interval_waiting_time[i] = t_st*sys->statistics.del_waiting_time[i];
+
+        sys->statistics.mean_service_time[i] = means.sum_service_area[i]/((long double) means.sum_departures[i]);
+        sys->statistics.del_service_time[i] =
+            sqrtl((long double) reg_cycle_n/(reg_cycle_n - 1)) *
+            sqrtl(means.squared_sum_service_area[i] - 2*(sys->statistics.mean_service_time[i])*(means.sum_of_product_service_and_departures[i]) + (sys->statistics.mean_service_time[i])*(sys->statistics.mean_service_time[i])*(means.squared_sum_departures[i])) /
+            (long double) means.sum_departures[i];
+        sys->statistics.semi_interval_service_time[i] = t_st * sys->statistics.del_service_time[i];
     }
+
     sys->statistics.mean_cycle_time = cyclemeasures.sum_cycle_time/cyclemeasures.sum_cycle_n;
     sys->statistics.del_cycle_time =
         sqrtl((long double) reg_cycle_n/(reg_cycle_n - 1)) *
@@ -41,6 +48,7 @@ void update_stations_measurements(System *sys, long double delta)
     int i;
     for (i = 0; i < N_STATIONS; i++){
         sys->stations[i].measures.waiting_area += delta*((long double) sys->stations[i].jobs_in_service + sys->stations[i].jobs_in_queue);
+        sys->stations[i].measures.service_area += delta*((long double) sys->stations[i].jobs_in_service);
     }
 }
 
@@ -57,6 +65,9 @@ void update_mean_measures(Means *means, Station *stations, int run)
         means->sum_waiting_area[i] += stations[i].measures.waiting_area;
         means->squared_sum_waiting_area[i] += powl(stations[i].measures.waiting_area, (long double)2.0);
 
+        means->sum_service_area[i] += stations[i].measures.service_area;
+        means->squared_sum_service_area[i] += powl(stations[i].measures.service_area, 2.0);
+
         //means->mean_departures[i] = (run*means->mean_departures[i] + stations[i].measures.departures_n)/((long double)(run+1));
         means->sum_departures[i] += stations[i].measures.departures_n;
         means->squared_sum_departures[i] += (long double) stations[i].measures.departures_n * stations[i].measures.departures_n;
@@ -68,6 +79,7 @@ void update_mean_measures(Means *means, Station *stations, int run)
         means->sum_of_product_waiting_and_arrivals[i] += stations[i].measures.waiting_area * ((long double) stations[i].measures.arrivals_n);
         means->sum_of_product_waiting_and_departures[i] += stations[i].measures.waiting_area * ((long double) stations[i].measures.departures_n);
 
+        means->sum_of_product_service_and_departures[i] += stations[i].measures.service_area * ((long double) stations[i].measures.departures_n);
     }
 
     long double temp_cycle_n_sum = cyclemeasures.sum_cycle_n - sqrtl(cyclemeasures.squared_sum_cycle_n);
