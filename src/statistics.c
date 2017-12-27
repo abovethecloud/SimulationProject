@@ -1,6 +1,6 @@
 #include "statistics.h"
 
-long double t_st = 2.04522964;
+long double t_st = 1.699; // for 90%, 2.04522964 for 95%
 
 void compute_statistics(System *sys, Means means)
 {
