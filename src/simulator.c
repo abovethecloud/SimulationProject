@@ -56,8 +56,10 @@ void simulate(System *sys)
             fprintf(stderr, "Final clock: %Lf\n", clock);
             fprintf(stderr, "Throughput of station 1: %Lf\n", sys->stations[1].measures.departures_n/T);
         }
+
+        compute_statistics(sys, means);
+
     }
-    compute_statistics(sys, means);
     //fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
     //fprintf(stderr, "Mean number of Jobs at station 1: %Lf\n", sys->statistics.mean_number_jobs[1]);
     //fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
