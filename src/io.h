@@ -4,6 +4,7 @@
 #include "globals.h"
 
 void report(System sys);
+void export_interval(FILE *fout, long double mean, long double semi_interval);
 void print_queue(Queue queue);
 void print_tree(Tree tree);
 void print_fel_v(Node *fel);

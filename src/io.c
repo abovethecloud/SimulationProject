@@ -16,6 +16,11 @@ void report(System sys)
     fprintf(stderr, "CONFIDENCE INTERVAL for SERVICE TIME at station %d: [%Lf, %Lf]\n", serv_stat, sys.statistics.mean_service_time[serv_stat] - sys.statistics.semi_interval_service_time[serv_stat], sys.statistics.mean_service_time[serv_stat] + sys.statistics.semi_interval_service_time[serv_stat]);
 }
 
+void export_interval(FILE *fout, long double mean, long double semi_interval)
+{
+    fprintf(fout, "%Lf,%Lf,%Lf\n", mean-semi_interval, mean, mean+semi_interval);
+}
+
 void print_queue(Queue queue)
 {
     int i = 0;
