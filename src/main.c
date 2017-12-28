@@ -9,10 +9,13 @@ int main(int argc, char const *argv[])
 {
     PlantSeeds(123456789);
 
+    int i;
     System sys;
-    simulate(&sys);
 
-    report();
+    for (i = 0; i < VALIDATE_N; i++){
+        simulate(&sys);
+        report(sys);
+    }
 
     return 0;
 }

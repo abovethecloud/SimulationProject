@@ -20,12 +20,15 @@
 #define N_CLIENTS 10
 #define CONSUMPTION_TIME 10.0
 
-#define MIN_REG_N 30
+#define MIN_REG_N 30  // Min number of regeneration cycles
+#define VALIDATE_N 1  // Number of runs for validation
 
 // Graphical parameters. Number of horizontal stations or events per row
 #define MAX_STAT_COL 6  // Max number of stations per row
 #define MAX_EV_COL 10  // Max number of events per row
 
+// VERBOSE: print after each regeneration cycle
+//#define VERBOSE
 // Comment or uncomment the following line to (de)activate general step-by-step prints throughout the simulator
 //#define DEBUG
 // Comment or uncomment the following line to (de)activate debug for current bugs
