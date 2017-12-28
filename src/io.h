@@ -3,7 +3,7 @@
 
 #include "globals.h"
 
-void report();
+void report(System sys);
 void print_queue(Queue queue);
 void print_tree(Tree tree);
 void print_fel_v(Node *fel);

@@ -43,40 +43,17 @@ void simulate(System *sys)
         } while (!engine(sys));
 
         // Update Measurements every Regeneration Cycle
-        if (i > 0) {  // Change to ">" to avoid taking into account the first cycle
+        if (i > 0) {  // Change to ">=" to start from first cycle
             T = clock - oldclock;
             update_mean_measures(&means, sys->stations, i);
-            fprintf(stderr, "waiting area = %40.20Lf\n", means.squared_sum_waiting_area[1]);
-
-            /* Final prints */
+            #ifdef VERBOSE
+            /* Final print of final state of system after regeneration cycle */
+            fprintf(stderr, "\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ REGENERATION CYCLE #%4d: /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n", i);
             system_recap(*sys);
-
-            fprintf(stderr, "N_dep from Server: %d\n", sys->stations[1].measures.departures_n);
-            fprintf(stderr, "N_arr to Server: %d\n", sys->stations[1].measures.arrivals_n);
-            fprintf(stderr, "Final clock: %Lf\n", clock);
-            fprintf(stderr, "Throughput of station 1: %Lf\n", sys->stations[1].measures.departures_n/T);
+            #endif
         }
-
         compute_statistics(sys, means);
-
     }
-    //fprintf(stderr, "Mean number of Jobs at station 0: %Lf\n", sys->statistics.mean_number_jobs[0]);  // TODO: CHANGE
-    //fprintf(stderr, "Mean number of Jobs at station 1: %Lf\n", sys->statistics.mean_number_jobs[1]);
-    //fprintf(stderr, "Mean number of Jobs in system: %Lf\n", sys->statistics.mean_number_jobs[0] + sys->statistics.mean_number_jobs[1]);
-    //fprintf(stderr, "Mean waiting: %Lf\n", sys->statistics.mean_waiting_time[1]);
-    //fprintf(stderr, "Waiting semi_interval: %Lf\n", sys->statistics.semi_interval_waiting_time[1]);
-    //fprintf(stderr, "CONFIDENCE INTERVAL: [%13.10Lf, %13.10Lf]\n", sys->statistics.mean_waiting_time[1]-sys->statistics.semi_interval_waiting_time[1], sys->statistics.mean_waiting_time[1]+sys->statistics.semi_interval_waiting_time[1]);
-    fprintf(stderr, "Mean cycle time: %Lf\n", sys->statistics.mean_cycle_time);
-    fprintf(stderr, "Cycle time semi-interval: %Lf\n", sys->statistics.semi_interval_cycle_time);
-    fprintf(stderr, "CONFIDENCE INTERVAL for CYCLE TIME: [%Lf, %Lf]\n", sys->statistics.mean_cycle_time - sys->statistics.semi_interval_cycle_time, sys->statistics.mean_cycle_time + sys->statistics.semi_interval_cycle_time);
-
-    fprintf(stderr, "Mean manufacturing time: %Lf\n", sys->statistics.mean_manufacturing_time);
-    fprintf(stderr, "Manufacturing time semi-interval: %Lf\n", sys->statistics.semi_interval_manufacturing_time);
-    fprintf(stderr, "CONFIDENCE INTERVAL for MANUFACTURING TIME: [%Lf, %Lf]\n", sys->statistics.mean_manufacturing_time - sys->statistics.semi_interval_manufacturing_time, sys->statistics.mean_manufacturing_time + sys->statistics.semi_interval_manufacturing_time);
-
-    int serv_stat = 1;
-    fprintf(stderr, "Mean service time at station %d: %Lf\n", serv_stat, sys->statistics.mean_service_time[serv_stat]);
-    fprintf(stderr, "CONFIDENCE INTERVAL for SERVICE TIME at station %d: [%Lf, %Lf]\n", serv_stat, sys->statistics.mean_service_time[serv_stat] - sys->statistics.semi_interval_service_time[serv_stat], sys->statistics.mean_service_time[serv_stat] + sys->statistics.semi_interval_service_time[serv_stat]);
 }
 
 void initialize(System *sys_point)

@@ -1,9 +1,19 @@
 #include "io.h"
 
 
-void report()
+void report(System sys)
 {
+    fprintf(stderr, "Mean cycle time: %Lf\n", sys.statistics.mean_cycle_time);
+    fprintf(stderr, "Cycle time semi-interval: %Lf\n", sys.statistics.semi_interval_cycle_time);
+    fprintf(stderr, "CONFIDENCE INTERVAL for CYCLE TIME: [%Lf, %Lf]\n", sys.statistics.mean_cycle_time - sys.statistics.semi_interval_cycle_time, sys.statistics.mean_cycle_time + sys.statistics.semi_interval_cycle_time);
 
+    fprintf(stderr, "Mean manufacturing time: %Lf\n", sys.statistics.mean_manufacturing_time);
+    fprintf(stderr, "Manufacturing time semi-interval: %Lf\n", sys.statistics.semi_interval_manufacturing_time);
+    fprintf(stderr, "CONFIDENCE INTERVAL for MANUFACTURING TIME: [%Lf, %Lf]\n", sys.statistics.mean_manufacturing_time - sys.statistics.semi_interval_manufacturing_time, sys.statistics.mean_manufacturing_time + sys.statistics.semi_interval_manufacturing_time);
+
+    int serv_stat = 1;
+    fprintf(stderr, "Mean service time at station %d: %Lf\n", serv_stat, sys.statistics.mean_service_time[serv_stat]);
+    fprintf(stderr, "CONFIDENCE INTERVAL for SERVICE TIME at station %d: [%Lf, %Lf]\n", serv_stat, sys.statistics.mean_service_time[serv_stat] - sys.statistics.semi_interval_service_time[serv_stat], sys.statistics.mean_service_time[serv_stat] + sys.statistics.semi_interval_service_time[serv_stat]);
 }
 
 void print_queue(Queue queue)
@@ -174,7 +184,6 @@ void print_all_stations_h(Station *stations)
 
 void system_recap(System sys)
 {
-    fprintf(stderr, "\n\n");
     fprintf(stderr, "============================================================================\n");
     fprintf(stderr, "========================= Clock = %16.5Lf =========================\n", clock);
     fprintf(stderr, "========================= Event_N %16d =========================\n", sys.event_counter);
@@ -183,5 +192,5 @@ void system_recap(System sys)
     print_all_stations_h(sys.stations);
     fprintf(stderr, "\n");
     print_fel_h(sys.fel);
-    fprintf(stderr, "\n");
+    fprintf(stderr, "\n\n");
 }
