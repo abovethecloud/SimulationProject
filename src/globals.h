@@ -21,7 +21,7 @@
 #define CONSUMPTION_TIME 10.0
 
 #define MIN_REG_N 30  // Min number of regeneration cycles
-#define VALIDATE_N 10  // Number of runs for validation
+#define VALIDATE_N 1000  // Number of runs for validation
 
 // Graphical parameters. Number of horizontal stations or events per row
 #define MAX_STAT_COL 6  // Max number of stations per row

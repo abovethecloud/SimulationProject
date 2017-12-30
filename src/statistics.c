@@ -1,6 +1,6 @@
 #include "statistics.h"
 
-long double t_st = 1.699; // for 90%; 2.04522964 for 95%; 0.683 for 50%
+long double t_st = 1.31143365;  // For 90% accuracy
 
 void compute_statistics(System *sys, Means means)
 {
