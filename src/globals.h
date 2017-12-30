@@ -21,14 +21,14 @@
 #define CONSUMPTION_TIME 10.0
 
 #define MIN_REG_N 30  // Min number of regeneration cycles
-#define VALIDATE_N 3  // Number of runs for validation
+#define VALIDATE_N 10  // Number of runs for validation
 
 // Graphical parameters. Number of horizontal stations or events per row
 #define MAX_STAT_COL 6  // Max number of stations per row
 #define MAX_EV_COL 10  // Max number of events per row
 
 // VERBOSE: print after each regeneration cycle
-//#define VERBOSE
+#define VERBOSE
 // Comment or uncomment the following line to (de)activate general step-by-step prints throughout the simulator
 //#define DEBUG
 // Comment or uncomment the following line to (de)activate debug for current bugs
@@ -187,5 +187,10 @@ extern long double meanT;
 extern long double mean_arrivals_at1;
 extern int reg_cycle_n;
 extern CycleMeasures cyclemeasures;
+extern CycleMeasures *cyclemeasures_point;
+extern int reached_end;
+extern int debug;
+extern long double consumption_time;
+extern long double N_events_stop;
 
 #endif

@@ -8,17 +8,20 @@ long double clock = 0.0;
 long double oldclock = 0.0;
 long double T = 0.0;
 long double consumption_time = CONSUMPTION_TIME;
-CycleMeasures cyclemeasures = {0};
-
+CycleMeasures *cyclemeasures_point;
+CycleMeasures cyclemeasures;
 
 int reg_cycle_n = MIN_REG_N;
 
 int reached_end = 0;
+int debug = 0;
 
 void simulate(System *sys)
 {
     int i;
     Means means = {0};
+    cyclemeasures_point = calloc(1, sizeof(CycleMeasures));
+    cyclemeasures = *cyclemeasures_point;
 
     /* Initialize system */
     initialize(sys);
@@ -33,12 +36,15 @@ void simulate(System *sys)
             reset_stations_measurements(sys->stations);
         }
 
+        if (i == 7)
+            debug = 1;
+
         /* Print report (if DEBUG is ON) and THEN run */
         do {
             #ifdef DEBUG  // Print DEBUG
-            system_recap(*sys);
-            fprintf(stderr, "CONSUMPTION TIME: %Lf\n", consumption_time);
-            getchar();
+            //if (debug == 1 && clock >= 84809500.0) {
+                system_recap(*sys);
+                getchar();
             #endif
         } while (!engine(sys));
 
@@ -328,6 +334,9 @@ int engine(System *sys)
     int halt = 0;
     int event_in_0 = 0;
 
+    //if (debug ==1 && clock >= 84809500.0)
+        //fprintf(stderr, "CLOCK = %Lf\n", clock);
+
     /* Get next event from FEL */
     Node* new_event = event_pop(pointer_to_fel);
 
@@ -341,10 +350,6 @@ int engine(System *sys)
         event_in_0 = 1;
 
     update_stations_measurements(sys, delta);
-    #ifdef DEBUG
-        fprintf(stderr, "service area 1: %Lf\n", sys->stations[1].measures
-            .service_area);
-    #endif
 
     switch(new_event->event.type)
     {
