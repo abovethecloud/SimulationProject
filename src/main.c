@@ -16,6 +16,15 @@ int main(int argc, char const *argv[])
     fprintf(cycle, "INF,MEAN,SUP\n");
 
     for (i = 0; i < VALIDATE_N; i++){
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "VALIDATION #%d\n", i);
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
+        fprintf(stderr, "-\n");
         sys_point = calloc(1, sizeof(System));
         N_events_stop = N_EVENTS_PER_CYCLE;
         clock = 0.0;
