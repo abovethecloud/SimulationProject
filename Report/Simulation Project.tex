@@ -119,12 +119,20 @@ For every random choice in the project (\textit{e.g.} routing for each station, 
 
 \subsection{Results}
 The requested statistics are the mean \textbf{cycle time}, which is the time taken to an \textit{AGV} to come back to the beginning and start again, and the mean \textbf{manufacturing time}, which is basically the time an \textit{AGV} spends in the manufacturing stations (\textit{M1}, \textit{M2}, \textit{M3}).
+\begin{align}
+\text{\textit{Average Cycle Time}} &= 1203.727909 \\
+\text{\textit{Cycle Time Confidence Interval}} &= [1202.431251, 1205.024567] \\
+\text{\textit{Average Manufacturing Time}} &= 1043.373882 \\
+\text{\textit{Manufacturing Time Confidence Interval}} &= [1041.878510, 1044.869254]
+\end{align}
 
 %%% TODO: RESULTS WITH M1
 
 \section{Validation}
 To verify that the results we got from our simulator are meaningful, we need to check wether simulations are coherent with the system taken into account. Since we do not have the chance to test a real system, we may check how our statistics compare to theoretical results computed for a simplified version of the system. The simplified version does in fact swap \textit{M1} with a negative exponential distributed \textit{SSSQ} station with short service time and a high probability of routing exiting jobs to itself again.
 The new model becomes a Product Form Queueing Network, and as such we can apply the convolution methods and the MVA\_LI\&D Algorithm to it.
+
+\subsection{Analysis} \label{subsec:analysis}
 First, we can use the consistency laws
 \begin{align}
 V = VQ \label{eq:consistency_laws}
@@ -138,7 +146,7 @@ Recalling also that the mean service times $S_i$ are:
 \begin{align}
 S = \begin{bmatrix}60 & 10 & 80 & 100 & 50 & 90\end{bmatrix}
 \end{align}
-we can compute the value of $S_i V_i$ for each station, and the station whose value is the greatest is the bottleneck of the system. In this case the bottleneck turns out to be \textit{M1}, so:
+we can compute the value of $S_i V_i$ for each station, and the station whose value is the greatest is the bottleneck of the system. In this case the bottleneck turns out to be \textit{M1}\footnote{Notice that \textit{M2} comes second with $D_2 = 100$, so it might become the hidden bottleneck of the system. \label{ftn:hidden_bottleneck}}, so:
 \begin{align}
 V_b S_b = V_1 S_1 = 125 \label{eq:VbSb}
 \end{align}
@@ -158,33 +166,80 @@ which represents the number of customers (\textit{AVG}s in this case) over which
 
 Using the same algorithm we can also compute the theoretical value of the average cycle and manufacturing times and  for $N = 10$.
 \begin{align}
-\text{\textit{Average Cycle Time}} = 1297.17365 \\
-\text{\textit{Average Manufacturing Time}} = 1137.68264
+\text{\textit{Average Cycle Time}} &= 1297.17365 \\
+\text{\textit{Average Manufacturing Time}} &= 1137.68264
 \end{align}
 
+\subsection{Validation}
 Knowing the theoretical values, we can now launch our simulation and expect the results to be consistent with those. But each simulation run is a (pseudo)random process, so how do we check consistency? The simplest way is to run the experiment a number of times, checking wether the confidence intervals contains the true value around 90\% of the times, since we chose the confidence intervals with 90\%confidence. For instance, in the first run we do, the confidence interval computed with 90\% probability is $\left[1296.195280, 1298.195589\right]$, and it does contain the theoretical value.
 
-Now, in figure (\ref{fig:cycle_validation}) we run the simulation 1000 times, checking that around 900 times the interval contains the theoretical values and that the intervals are almost symmetrical (checking for instance that some are higher and some lower in a comparable manner).
+Now, in figure \ref{fig:cycle_validation} we run the simulation 1000 times, checking that around 900 times the interval contains the theoretical values and that the intervals are almost symmetrical (checking for instance that some are higher and some lower in a comparable manner).
 \begin{figure}
 	\begin{adjustwidth}{-\oddsidemargin-0.5in}{-\rightmargin}
      		\centering
 		\includegraphics[height = 0.82\paperheight]{"img/cycle_validation"}
-		\label{fig:cycle_validation}
 		\caption{A night's worth of simulation. 1000 confidence intervals for the Cycle Time.}
+		\label{fig:cycle_validation}
 		\end{adjustwidth}
 \end{figure}
 The intervals including the theoretical value are 866, the intervals out of range are 134. We also notice that the intervals are almost symmetric with around half, 444, stay below and 422 stay above. The same goes for the "wrong" intervals, 61 of which stay completely over and 73 are completely under.
 The numbers are absolutely similar for the manufacturing time confidence interval, and we could show a similar graph.
 
 \section{Variations}
+The following variations all concern the most complex station of the network, namely \textit{M1}.
 
+\subsection{Original Project}
+\texttt{Mean cycle time: 1203.727909\\
+Cycle time semi-interval: 1.296658\\
+CONFIDENCE INTERVAL for CYCLE TIME: [1202.431251, 1205.024567]\\
+Mean manufacturing time: 1043.373882\\
+Manufacturing time semi-interval: 1.495372\\
+CONFIDENCE INTERVAL for MANUFACTURING TIME: [1041.878510, 1044.869254]}
 
+These are the outputs of the simulator for the original project.
 
+\subsection{Negative exponential instead of Hyper-Exponential with same mean} \label{subsec:proj2}
+\texttt{Mean cycle time: 1202.599304\\
+Cycle time semi-interval: 0.713844\\
+CONFIDENCE INTERVAL for CYCLE TIME: [1201.885460, 1203.313148]\\
+Mean manufacturing time: 1041.905798\\
+Manufacturing time semi-interval: 0.947266\\
+CONFIDENCE INTERVAL for MANUFACTURING TIME: [1040.958531, 1042.853064]}\\
 
+This variant shows the effects of switching to a station M1 with a simpler distribution with same mean. While the numerical value of the mean for both cycle and manufacturing time does not change much, the variance is reduced and as a result the width of the interval is reduced (thus the precision increased)\footnote{Note that this is due to the fact that we imposed at least 30 regeneration cycles to compute the statistics, and that the number of cycles necessary for the requested performance is lower than 30. Otherwise we would have had the same width of the interval but with less cycles.}.
 
+\subsection{Hyper-Exponential with tool consumption time of 10.000"} \label{subsec:proj3}
+\texttt{Mean cycle time: 1265.498084\\
+Cycle time semi-interval: 1.016637\\
+CONFIDENCE INTERVAL for CYCLE TIME: [1264.481447, 1266.514721]\\
+Mean manufacturing time: 1104.315544\\
+Manufacturing time semi-interval: 0.975608\\
+CONFIDENCE INTERVAL for MANUFACTURING TIME: [1103.339936, 1105.291152]}\\
 
+This other variant is quite interesting actually. It shows that by increasing the tool consumption time we have an increase in the average cycle time. This is probably due to the variance of the Hyper-Exponential and to the paradox of the instantly-moving \textit{AVG}s. If we don't have idle times during the swapping of the piece, the Round-Robin policy is actually beneficial to the average cycle time, since it prevents very long jobs (which happen from time to time, more frequently for the Hyper-Exponential, which has an higher variance) from obstructing the server.
 
+\subsection{Negative exponential (with same mean) and tool consumption time of 10.000"}
+\texttt{Mean cycle time: 1203.155691\\
+Cycle time semi-interval: 0.663368\\
+CONFIDENCE INTERVAL for CYCLE TIME: [1202.492323, 1203.819059]\\
+Mean manufacturing time: 1042.330756\\
+Manufacturing time semi-interval: 0.645855\\
+CONFIDENCE INTERVAL for MANUFACTURING TIME: [1041.684901, 1042.976612]}\\
 
+The last variant shows that in the case of negative exponential distribution with same mean, the impact of a much higher consumption time is very different. In fact, the average cycle and manufacturing times stay almost the same, while the precision (inverse of the width of the confidence interval) further increases with respect to section \ref{subsec:proj2}.
+
+\subsection{One more variation}
+\texttt{Mean cycle time: 1202.356747\\
+Cycle time semi-interval: 1.937429\\
+CONFIDENCE INTERVAL for CYCLE TIME: [1200.419318, 1204.294176]\\
+Mean manufacturing time: 1041.584513\\
+Manufacturing time semi-interval: 2.289834\\
+CONFIDENCE INTERVAL for MANUFACTURING TIME: [1039.294679, 1043.874346]}\\
+
+After having analysed the baffling third project, we may want to investigate further the opposite extreme: what happens with a very small tool consumption time? The results above are obtained by keeping the Hyper-Exponential distribution and decreasing the value of the tool consumption time to 1s. As we might expect at this point, the mean cycle time does not change from the case with 10s, and this is undoubtedly due to the modelling assumption of the instantly moving \textit{AVG}s, and the considerations in section \ref{subsec:proj3} remain relevant.
+
+\subsection{Closing Thoughts}
+After analysing the proposed (and not) variations to the project, in particular the third and fifth, we may come to the conclusion that even if it was possible to increase the time tools take to break, it might not be a good idea so long as a Round-Robin approach with relatively low time slices is not implemented by design. We can also conclude that we can prefer stations that behave as close as possible to negative exponential distributed ones.
 
 
 %%% End document

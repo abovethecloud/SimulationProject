@@ -104,13 +104,13 @@ void initialize_stations(Station **pointer_to_stations)
     stat[0].coffe_distribution = '\0';  // Does not apply
     stat[0].coffe_parameter = 0.0;  // Does not apply
 
-    stat[1].type = 'S';  // complex: 'M'; simple: 'S'
-    stat[1].distribution = 'e';  // complex: 'E'; simple 'e'
-    stat[1].parameters[0] = 10.0;  // complex: 50.0; simple: 10.0
-    stat[1].parameters[1] = 0.0;  // complex: 250.0; simple: 0.0
+    stat[1].type = 'M';  // complex: 'M'; simple: 'S'
+    stat[1].distribution = 'E';  // complex: 'E'; simple 'e'
+    stat[1].parameters[0] = 50.0;  // complex: 50.0; simple: 10.0
+    stat[1].parameters[1] = 250.0;  // complex: 250.0; simple: 0.0
     stat[1].prob_to_stations[0] = 0.0;
-    stat[1].prob_to_stations[1] = 0.9;  // complex: 0.0; simple: 0.9
-    stat[1].prob_to_stations[2] = 0.1;  // complex: 1.0; simple: 0.1
+    stat[1].prob_to_stations[1] = 0.0;  // complex: 0.0; simple: 0.9
+    stat[1].prob_to_stations[2] = 1.0;  // complex: 1.0; simple: 0.1
     stat[1].prob_to_stations[3] = 0.0;
     stat[1].prob_to_stations[4] = 0.0;
     stat[1].prob_to_stations[5] = 0.0;
