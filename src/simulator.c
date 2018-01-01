@@ -59,6 +59,11 @@ void simulate(System *sys)
             #endif
         }
         compute_statistics(sys, means);
+        if (i >= reg_cycle_n){  // Stop only when sure that precision is at least +-5%
+            if (sys->statistics.semi_interval_cycle_time > 0.05*sys->statistics.mean_cycle_time){
+                reg_cycle_n++;
+            }
+        }
     }
 }
 

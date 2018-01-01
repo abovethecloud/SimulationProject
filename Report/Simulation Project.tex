@@ -34,8 +34,15 @@
 \usepackage[english]{babel}															% English language/hyphenation
 \usepackage[protrusion=true,expansion=true]{microtype}	
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
-\usepackage[pdftex]{graphicx}	
+\usepackage[pdftex]{graphicx}
+\usepackage{grffile}  % Better extensions recognition (e.g. .png)
 \usepackage{url}
+
+% For page-wide images
+\usepackage{chngpage}
+\usepackage{calc}
+
+\usepackage{mathtools}
 
 
 %%% Custom sectioning
@@ -67,15 +74,15 @@
 \title{
 		%\vspace{-1in} 	
 		\usefont{OT1}{bch}{b}{n}
-		\normalfont \normalsize \textsc{School of random department names} \\ [25pt]
+		\normalfont \normalsize \textsc{Simulation Project} \\ [25pt]
 		\horrule{0.5pt} \\[0.4cm]
-		\huge This is the title of the template report \\
+		\huge Project n$^{\text{o}}$2\\
 		\horrule{2pt} \\[0.5cm]
 }
 \author{
 		\normalfont 								\normalsize
-        Firstname Lastname\\[-3pt]		\normalsize
-        \today
+        Claudio Peroni\\[-3pt]		\normalsize
+        %\today
 }
 \date{}
 
@@ -83,57 +90,102 @@
 %%% Begin document
 \begin{document}
 \maketitle
-\section{Heading on level 1 (section)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus:
-\begin{align} 
-	\begin{split}
-	(x+y)^3 	&= (x+y)^2(x+y)\\
-					&=(x^2+2xy+y^2)(x+y)\\
-					&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
-					&=x^3+3x^2y+3xy^2+y^3
-	\end{split}					
-\end{align}
-Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies 
+\section{Brief overview of the System and Model semplifications}
+The system taken into account is a Flexible Cell of an automated factory (\textit{FMS}).
+Raw parts are loaded on \textit{AGV}s and are then processed by up to 3 machines before being unloaded. The \textit{AGV}s sometimes need recharging, but apart from that are considered to become instantly available for loading a new piece and to move instantly from one machine to the next.
+To build our model, we consider 6 stations, only half of which operates on the raw parts loaded on the \textit{AGV}s (\textit{M1}, \textit{M2}, \textit{M3}), while the remaining stations represent the loading, unloading and recharging of the \textit{AGV}s.
 
-\subsection{Heading on level 2 (subsection)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
-\begin{align}
-	A = 
-	\begin{bmatrix}
-	A_{11} & A_{21} \\
-  	A_{21} & A_{22}
-	\end{bmatrix}
-\end{align}
-Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
+The \textit{Load} and \textit{Unload} stations are considered to be infinite servers stations (delay stations). The number of \textit{AGV}s represents the maximum number of clients in the system. Every other station in the model is supposed to be a \textit{SSSQ}. \textit{M1} is a complex station which follows a Round-Robin approach for the service of its clients. Once a client completes its work there, it is serviced by \textit{M2}, after which it might be sent back to \textit{M1} (passing by \textit{M3}) or directly to the \textit{Unload} station.
 
-\subsubsection{Heading on level 3 (subsubsection)}
-Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.
+\section{Implementation and statistics}
+\subsection{Code structure}
+The simulator is made up of different modules. The core of the simulation is the \textit{engine()} function, which handles the next event in the \textit{FEL} for each iteration. The event can be an \textit{ARRIVAL}, a \textit{DEPARTURE} or a \textit{SELF\_TRANSITION}.
 
-\paragraph{Heading on level 4 (paragraph)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. 
+Each event is charachterised by station and time. Arriving clients can be queued or served depending on the state of the server(s) and, of course, the type of station - Delay Stations don't have a queue. Departing clients are routed to the next station based on assumed routing probabilities. The self transition is a particular type of departure that ignores routing and instead removes from service the current client, sending it back in queue; this is useful for the implementation of the Round-Robin policy of \textit{M1}.
 
+Each station is charachterised by its type (\textit{Delay} or \textit{Server}), a routing table, and the probabilistic distribution that decides the service time for each job.
 
-\section{Lists}
-
-\subsection{Example for list (3*itemize)}
+Since the aim of the simulation is to compute statistics, we use the regenerative method to draw them from a single simulation run. The way to do this is to define regeneration points, charachterised by the number of clients at each station and a triggering event. To simplify, we initialize the system already in this way.
+The initialisation is chosen following 2 criteria:
 \begin{itemize}
-	\item First item in a list 
-		\begin{itemize}
-		\item First item in a list 
-			\begin{itemize}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{itemize}
-		\item Second item in a list 
-		\end{itemize}
-	\item Second item in a list 
+	\item \textit{M1} should be either empty or full since unfortunately it does not have the nice properties of stations charachterized by a negative exponential distribution;
+	\item the clients should be distributed in such a way that the regeneration point is likely to happen often but at the same time not too common.
 \end{itemize}
+Our choice is to set \textit{M1} as empty and to distribute clients between the other stations based on the frequency of visits for each station in a test run.
 
-\subsection{Example for list (enumerate)}
-\begin{enumerate}
-	\item First item in a list 
-	\item Second item in a list 
-	\item Third item in a list
-\end{enumerate}
+Each regeneration cycle is forced to have minimum length to avoid very short cycles due to quick compensating events. Other than that the number of regeneration cycles has a minimum of 30 and depends also on the requested precision for the confidence value. By default, the requested precision for the intervals is 90\% with $\pm$5\% accuracy.
+
+For every random choice in the project (\textit{e.g.} routing for each station, service time for each station\dots) a different stream from the \textit{rngs} library is used. The default seed is set to 123456789.
+
+\subsection{Results}
+The requested statistics are the mean \textbf{cycle time}, which is the time taken to an \textit{AGV} to come back to the beginning and start again, and the mean \textbf{manufacturing time}, which is basically the time an \textit{AGV} spends in the manufacturing stations (\textit{M1}, \textit{M2}, \textit{M3}).
+
+%%% TODO: RESULTS WITH M1
+
+\section{Validation}
+To verify that the results we got from our simulator are meaningful, we need to check wether simulations are coherent with the system taken into account. Since we do not have the chance to test a real system, we may check how our statistics compare to theoretical results computed for a simplified version of the system. The simplified version does in fact swap \textit{M1} with a negative exponential distributed \textit{SSSQ} station with short service time and a high probability of routing exiting jobs to itself again.
+The new model becomes a Product Form Queueing Network, and as such we can apply the convolution methods and the MVA\_LI\&D Algorithm to it.
+First, we can use the consistency laws
+\begin{align}
+V = VQ \label{eq:consistency_laws}
+\end{align}
+where $V$ is the visit count vector and $Q$ the routing probability matrix to get the value of $V$, since $Q$ is known. We then apply the Gauss Method to (\ref{eq:consistency_laws}), choosing $V_0 = 1$ (Load station as reference station) to get a single solution instead of infinite.
+Then,
+\begin{align}
+V = \begin{bmatrix}1.0 & 12.5 & 1.25 & 0.25 & 1.0 & 0.4\end{bmatrix}
+\end{align}
+Recalling also that the mean service times $S_i$ are:
+\begin{align}
+S = \begin{bmatrix}60 & 10 & 80 & 100 & 50 & 90\end{bmatrix}
+\end{align}
+we can compute the value of $S_i V_i$ for each station, and the station whose value is the greatest is the bottleneck of the system. In this case the bottleneck turns out to be \textit{M1}, so:
+\begin{align}
+V_b S_b = V_1 S_1 = 125 \label{eq:VbSb}
+\end{align}
+Letting the number of \textit{AVG}s in the system go to infinity, the throughput of the system (with reference station the Load station 0) $X_0$ tends to the reciprocal of $V_b S_b$:
+\begin{align}
+X_0(N) \xrightarrow{N\to\infty} \frac{1}{V_b S_b} = 0.008
+\end{align}
+Now we can effectively apply the MVA\_LI\&D Algorithm to compute the values of $X_i$, $U_i$, $\bar{w}_i$, $\bar{n}_i$ for $0 \le N \le 30$.
+
+\includegraphics[width=\textwidth]{"img/X0"}
+
+We can then compute the response time of the system with just one customer, which is $R(1) = V_1 S_1 + V_2 S_2 + V_3 S_3 = 250$ and use it to derive
+\begin{align}
+N^* = \frac{R(1) + Z}{V_b S_b} = 3.168
+\end{align}
+which represents the number of customers (\textit{AVG}s in this case) over which we expect to see queues in the system.
+
+Using the same algorithm we can also compute the theoretical value of the average cycle and manufacturing times and  for $N = 10$.
+\begin{align}
+\text{\textit{Average Cycle Time}} = 1297.17365 \\
+\text{\textit{Average Manufacturing Time}} = 1137.68264
+\end{align}
+
+Knowing the theoretical values, we can now launch our simulation and expect the results to be consistent with those. But each simulation run is a (pseudo)random process, so how do we check consistency? The simplest way is to run the experiment a number of times, checking wether the confidence intervals contains the true value around 90\% of the times, since we chose the confidence intervals with 90\%confidence. For instance, in the first run we do, the confidence interval computed with 90\% probability is $\left[1296.195280, 1298.195589\right]$, and it does contain the theoretical value.
+
+Now, in figure (\ref{fig:cycle_validation}) we run the simulation 1000 times, checking that around 900 times the interval contains the theoretical values and that the intervals are almost symmetrical (checking for instance that some are higher and some lower in a comparable manner).
+\begin{figure}
+	\begin{adjustwidth}{-\oddsidemargin-0.5in}{-\rightmargin}
+     		\centering
+		\includegraphics[height = 0.82\paperheight]{"img/cycle_validation"}
+		\label{fig:cycle_validation}
+		\caption{A night's worth of simulation. 1000 confidence intervals for the Cycle Time.}
+		\end{adjustwidth}
+\end{figure}
+The intervals including the theoretical value are 866, the intervals out of range are 134. We also notice that the intervals are almost symmetric with around half, 444, stay below and 422 stay above. The same goes for the "wrong" intervals, 61 of which stay completely over and 73 are completely under.
+The numbers are absolutely similar for the manufacturing time confidence interval, and we could show a similar graph.
+
+\section{Variations}
+
+
+
+
+
+
+
+
+
+
 %%% End document
 \end{document}
